@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://cxtw61n5l7gd4"]
+
+[ext_resource type="Texture2D" uid="uid://c3qykxxwmpbfe" path="res://assets/flying_demon/projectile.png" id="1_3s14c"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1gl40"]
+radius = 9.0
+height = 18.0
+
+[node name="Fireball" type="Area2D"]
+
+[node name="Projectile" type="Sprite2D" parent="."]
+position = Vector2(7, -2)
+texture = ExtResource("1_3s14c")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CapsuleShape2D_1gl40")
