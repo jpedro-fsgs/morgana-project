@@ -8,8 +8,10 @@ var fireball_scene = preload("res://scenes/fireball.tscn")
 const SPEED = 75.0
 
 var HP = 100
+var is_dead = false
 
 func take_damage(amount: int, source: Node = null) -> void:
+	if is_dead: return
 	HP -= amount
 	print("Demon took damage! HP: ", HP)
 	
@@ -21,7 +23,10 @@ func take_damage(amount: int, source: Node = null) -> void:
 	if HP <= 0:
 		die()
 func die() -> void:
+	is_dead = true
+	$CollisionShape2D.set_deferred("disabled", true)
 	animation.play("die")
+	
 	death_timer.start(1)
 	
 func _on_fireball() -> void:
@@ -36,6 +41,7 @@ func _ready() -> void:
 	
 
 func _physics_process(_delta: float) -> void:
+	if is_dead: return
 	velocity.x = -SPEED
 	move_and_slide()
 

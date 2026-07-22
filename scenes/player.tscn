@@ -239,6 +239,9 @@ animations = [{
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qlg0r"]
 size = Vector2(23, 64)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hitbox"]
+size = Vector2(60, 60)
+
 [node name="Player" type="CharacterBody2D"]
 script = ExtResource("1_tuyoq")
 
@@ -251,7 +254,10 @@ autoplay = "idle2"
 position = Vector2(0.5, 0)
 shape = SubResource("RectangleShape2D_qlg0r")
 
-[node name="RayCast2D" type="RayCast2D" parent="."]
-target_position = Vector2(80, 0)
+[node name="Hitbox" type="Area2D" parent="."]
+position = Vector2(40, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+shape = SubResource("RectangleShape2D_hitbox")
 
 [connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]

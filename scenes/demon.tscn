@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3 uid="uid://c4iintfv7g16b"]
+[gd_scene format=3 uid="uid://c4iintfv7g16b"]
 
 [ext_resource type="Texture2D" uid="uid://c72vi0trbw586" path="res://assets/flying_demon/ATTACK.png" id="1_ofewj"]
 [ext_resource type="Script" uid="uid://cf8cxi1tc2yt5" path="res://scripts/demon.gd" id="1_yt4xr"]
@@ -193,20 +193,20 @@ animations = [{
 [sub_resource type="CircleShape2D" id="CircleShape2D_npmpn"]
 radius = 21.2132
 
-[node name="Demon" type="CharacterBody2D"]
+[node name="Demon" type="CharacterBody2D" unique_id=687037635]
 script = ExtResource("1_yt4xr")
 
-[node name="Animation" type="AnimatedSprite2D" parent="."]
+[node name="Animation" type="AnimatedSprite2D" parent="." unique_id=1201881892]
 sprite_frames = SubResource("SpriteFrames_usbmy")
 animation = &"moving"
 autoplay = "moving"
 frame_progress = 0.968483
 
-[node name="DeathTimer" type="Timer" parent="."]
+[node name="DeathTimer" type="Timer" parent="." unique_id=728965187]
 
-[node name="FireballTimer" type="Timer" parent="."]
+[node name="FireballTimer" type="Timer" parent="." unique_id=1499784574]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=718955804]
 position = Vector2(-10, 7)
 shape = SubResource("CircleShape2D_npmpn")
 

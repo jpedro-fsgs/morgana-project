@@ -6,7 +6,7 @@ const JUMP_VELOCITY = -400.0
 const MAX_JUMPS: int = 3
 var jump_count: int = 0
 
-const SWORD_ATTACK_DAMAGE = 90
+const SWORD_ATTACK_DAMAGE = 100
 const FIREBALL_ATTACK_DAMAGE = 25
 
 var is_attacking: bool = false
@@ -39,10 +39,8 @@ func attack() -> void:
 		is_attacking = true
 		animation.play("attack2")
 		
-		# Forçar atualização do RayCast2D
-		$RayCast2D.force_raycast_update()
-		if $RayCast2D.is_colliding():
-			var target = $RayCast2D.get_collider()
+		var targets = $Hitbox.get_overlapping_bodies()
+		for target in targets:
 			if target != self and target.has_method("take_damage"):
 				target.take_damage(SWORD_ATTACK_DAMAGE, self)
 
@@ -77,11 +75,11 @@ func _process(_delta):
 	if direction > 0:
 		facing_right = true
 		animation.flip_h = false
-		$RayCast2D.target_position.x = 80
+		$Hitbox.position.x = 40
 	elif direction < 0:
 		facing_right = false
 		animation.flip_h = true
-		$RayCast2D.target_position.x = -80
+		$Hitbox.position.x = -40
 		
 	if is_attacking:
 		return
