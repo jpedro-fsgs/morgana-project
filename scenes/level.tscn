@@ -1,36 +1,40 @@
-[gd_scene load_steps=5 format=3 uid="uid://bht7nxd2g2auw"]
+[gd_scene format=3 uid="uid://bht7nxd2g2auw"]
 
 [ext_resource type="PackedScene" uid="uid://ofb7ihach6qd" path="res://scenes/background.tscn" id="1_w7c3h"]
 [ext_resource type="PackedScene" uid="uid://bitili646qdbr" path="res://scenes/player.tscn" id="2_w8frs"]
 [ext_resource type="PackedScene" uid="uid://c4iintfv7g16b" path="res://scenes/demon.tscn" id="3_w8frs"]
+[ext_resource type="Script" uid="uid://bmqvf8mqk4xn4" path="res://scripts/enemy_spawner.gd" id="4_spawner"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_walls"]
 size = Vector2(100, 2000)
 
-[node name="Level" type="Node2D"]
+[node name="Level" type="Node2D" unique_id=595106683]
 
-[node name="Background" parent="." instance=ExtResource("1_w7c3h")]
+[node name="Background" parent="." unique_id=1603449858 instance=ExtResource("1_w7c3h")]
 
-[node name="Player" parent="." instance=ExtResource("2_w8frs")]
+[node name="Player" parent="." unique_id=1941554375 instance=ExtResource("2_w8frs")]
 position = Vector2(296, 696)
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1751170864]
 position = Vector2(576, 600)
 rotation = -0.018133
 zoom = Vector2(1.5, 1.5)
 limit_bottom = 780
 
-[node name="Demon" parent="." instance=ExtResource("3_w8frs")]
-position = Vector2(576, 629)
-
-[node name="LeftWall" type="StaticBody2D" parent="."]
+[node name="LeftWall" type="StaticBody2D" parent="." unique_id=102137214]
 position = Vector2(142, 600)
+collision_layer = 2
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall" unique_id=1587147032]
 shape = SubResource("RectangleShape2D_walls")
 
-[node name="RightWall" type="StaticBody2D" parent="."]
+[node name="RightWall" type="StaticBody2D" parent="." unique_id=796456717]
 position = Vector2(1010, 600)
+collision_layer = 2
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall" unique_id=1389360631]
 shape = SubResource("RectangleShape2D_walls")
+
+[node name="EnemySpawner" type="Node2D" parent="." unique_id=798814666]
+script = ExtResource("4_spawner")
+enemy_scene = ExtResource("3_w8frs")

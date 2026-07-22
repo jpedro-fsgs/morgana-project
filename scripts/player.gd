@@ -6,10 +6,17 @@ const JUMP_VELOCITY = -400.0
 const MAX_JUMPS: int = 3
 var jump_count: int = 0
 
+const SWORD_ATTACK_DAMAGE = 90
+const FIREBALL_ATTACK_DAMAGE = 25
+
 var is_attacking: bool = false
 var fireball_scene = preload("res://scenes/fireball.tscn")
 var facing_right: bool = true
 var HP: int = 100
+
+func _ready() -> void:
+	# Ativa a detecção de colisão do Player com o Layer 2 (as paredes invisíveis)
+	set_collision_mask_value(2, true)
 
 func take_damage(amount: int, source: Node = null) -> void:
 	HP -= amount
@@ -37,7 +44,7 @@ func attack() -> void:
 		if $RayCast2D.is_colliding():
 			var target = $RayCast2D.get_collider()
 			if target != self and target.has_method("take_damage"):
-				target.take_damage(20, self)
+				target.take_damage(SWORD_ATTACK_DAMAGE, self)
 
 func _physics_process(delta: float) -> void:
 	# Add the gravity.
@@ -95,6 +102,7 @@ func _on_animated_sprite_2d_animation_finished() -> void:
 func shoot_fireball() -> void:
 	var fireball = fireball_scene.instantiate()
 	fireball.shooter = self
+	fireball.damage = FIREBALL_ATTACK_DAMAGE
 	fireball.direction = 1 if facing_right else -1
 	fireball.global_position = global_position + Vector2(20 * fireball.direction, 0)
 	get_parent().add_child(fireball)

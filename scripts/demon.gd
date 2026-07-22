@@ -32,12 +32,11 @@ func _on_fireball() -> void:
 	get_parent().add_child(fireball)
 
 func _ready() -> void:
-	_on_fireball()
+	pass
 	
 
 func _physics_process(_delta: float) -> void:
-	
-	#velocity = direction * SPEED
+	velocity.x = -SPEED
 	move_and_slide()
 
 
