@@ -41,7 +41,12 @@ func _physics_process(delta: float) -> void:
 func _process(_delta):
 	var direction = velocity.x
 	
-	#scale.x = 1 if direction > 0 else -1
+	if direction > 0:
+		animation.flip_h = false
+		$RayCast2D.target_position.x = 80
+	elif direction < 0:
+		animation.flip_h = true
+		$RayCast2D.target_position.x = -80
 		
 	if is_attacking:
 		return
