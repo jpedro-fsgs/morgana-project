@@ -7,6 +7,8 @@ const MAX_JUMPS: int = 3
 var jump_count: int = 0
 
 var is_attacking: bool = false
+var fireball_scene = preload("res://scenes/fireball.tscn")
+var facing_right: bool = true
 
 func attack() -> void:
 	if not is_attacking:
@@ -42,9 +44,11 @@ func _process(_delta):
 	var direction = velocity.x
 	
 	if direction > 0:
+		facing_right = true
 		animation.flip_h = false
 		$RayCast2D.target_position.x = 80
 	elif direction < 0:
+		facing_right = false
 		animation.flip_h = true
 		$RayCast2D.target_position.x = -80
 		
@@ -63,3 +67,13 @@ func _process(_delta):
 func _on_animated_sprite_2d_animation_finished() -> void:
 	if is_attacking:
 		is_attacking = false
+
+func shoot_fireball() -> void:
+	var fireball = fireball_scene.instantiate()
+	fireball.direction = 1 if facing_right else -1
+	fireball.global_position = global_position + Vector2(20 * fireball.direction, 0)
+	get_parent().add_child(fireball)
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+		shoot_fireball()
