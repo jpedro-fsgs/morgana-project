@@ -13,32 +13,46 @@ const JUMP_VELOCITIES: Array[float] = [-400.0, -380.0, -350.0, -310.0]
 var jump_count: int = 0
 var is_crouching: bool = false
 
-const ATTACK_COOLDOWN = 0.35
+# --- Sistema de Magia e Base de Tempo ---
+var base_magic_cooldown: float = 1.0 # Tempo base. Alterar isso acelera/desacelera TODAS as magias
+
+const MAGIC_COOLDOWN_MULT: float = 0.35
 const MAGIC_DAMAGE = 25
 const PARALYSIS_TIME = 1.1 # reduzido de 2.0 para o jogador ficar preso por menos tempo
 
 # Ataque carregado: segurar a tecla A por 1s dispara um raio perfurante (atinge vários morcegos)
 const CHARGE_TIME = 1.0
 const CHARGED_DAMAGE = 40
-const CHARGED_COOLDOWN = 2.0
+const CHARGED_COOLDOWN_MULT: float = 2.0
 
 var fireball_scene = preload("res://scenes/fireball.tscn")
 var facing_right: bool = true
-var can_attack: bool = true
 var is_paralyzed: bool = false
 
 var _is_charging: bool = false
 var _charge_time: float = 0.0
-var can_charged_attack: bool = true
 var is_attacking: bool = false
-const SWORD_ATTACK_DAMAGE = 100
 
 # Aura Attack Variables
-var current_aura_radius: float = 0.0
-var current_aura_alpha: float = 0.0
-var aura_cooldown_timer: float = 0.0
-const AURA_COOLDOWN: float = 1.5
+const AURA_DAMAGE = 100
+const AURA_COOLDOWN_MULT: float = 0.75
 const AURA_MAX_RADIUS: float = 160.0
+
+# Global Magic Cooldown System
+var global_cooldown_timer: float = 0.0
+var global_cooldown_max: float = 1.0
+
+var cooldown_visualizer: CooldownVisualizer
+var aura_visualizer: AuraVisualizer
+
+func start_global_cooldown(duration: float) -> void:
+	global_cooldown_timer = duration
+	global_cooldown_max = duration
+	if cooldown_visualizer:
+		cooldown_visualizer.update_cooldown(1.0 - (global_cooldown_timer / global_cooldown_max))
+
+func is_global_cooldown_ready() -> bool:
+	return global_cooldown_timer <= 0.0
 
 func _ready() -> void:
 	set_collision_mask_value(2, true) # colide com as paredes invisíveis (Layer 2)
@@ -53,6 +67,13 @@ func _ready() -> void:
 		aura_shape.radius = AURA_MAX_RADIUS
 		$Hitbox/CollisionShape2D.shape = aura_shape
 		$Hitbox.position = Vector2.ZERO # Centraliza na maga
+
+	cooldown_visualizer = CooldownVisualizer.new()
+	add_child(cooldown_visualizer)
+	cooldown_visualizer.initialize(animation)
+
+	aura_visualizer = AuraVisualizer.new()
+	add_child(aura_visualizer)
 
 func take_damage(amount: int, source: Node = null) -> void:
 	# Reservado para uma futura vida da própria maga, se o jogo evoluir para isso.
@@ -94,19 +115,14 @@ func _aim_direction() -> Vector2:
 	return Vector2.RIGHT if facing_right else Vector2.LEFT
 
 func attack() -> void:
-	if not is_attacking and not is_paralyzed and aura_cooldown_timer <= 0.0:
+	if not is_attacking and not is_paralyzed and is_global_cooldown_ready():
 		is_attacking = true
 		animation.play("attack2") # Mantém como placeholder
-		aura_cooldown_timer = AURA_COOLDOWN
+		start_global_cooldown(AURA_COOLDOWN_MULT * base_magic_cooldown)
 		
 		# Efeito Visual 360
-		current_aura_radius = 20.0
-		current_aura_alpha = 0.6
-		var tween = create_tween()
-		tween.set_parallel(true)
-		tween.tween_property(self, "current_aura_radius", AURA_MAX_RADIUS, 0.25).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		tween.tween_property(self, "current_aura_alpha", 0.0, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		tween.finished.connect(func(): current_aura_radius = 0.0)
+		if aura_visualizer:
+			aura_visualizer.play_explosion(AURA_MAX_RADIUS)
 		
 		# Dano aos inimigos ao redor
 		get_tree().create_timer(0.05).timeout.connect(func():
@@ -114,7 +130,7 @@ func attack() -> void:
 				var targets = $Hitbox.get_overlapping_bodies()
 				for target in targets:
 					if target != self and target.has_method("take_damage"):
-						target.take_damage(SWORD_ATTACK_DAMAGE, self)
+						target.take_damage(AURA_DAMAGE, self)
 		)
 
 func _on_animated_sprite_2d_animation_finished() -> void:
@@ -122,6 +138,7 @@ func _on_animated_sprite_2d_animation_finished() -> void:
 		is_attacking = false
 
 func shoot_magic() -> void:
+	start_global_cooldown(MAGIC_COOLDOWN_MULT * base_magic_cooldown)
 	var fireball = fireball_scene.instantiate()
 	fireball.shooter = self
 	fireball.damage = MAGIC_DAMAGE
@@ -130,6 +147,7 @@ func shoot_magic() -> void:
 	get_parent().add_child(fireball)
 
 func shoot_charged_magic() -> void:
+	start_global_cooldown(CHARGED_COOLDOWN_MULT * base_magic_cooldown)
 	# Raio perfurante: atinge vários morcegos em linha, dano maior
 	var beam = fireball_scene.instantiate()
 	beam.pierce = true
@@ -138,16 +156,6 @@ func shoot_charged_magic() -> void:
 	beam.direction = _aim_direction()
 	beam.global_position = global_position + beam.direction * 24.0
 	get_parent().add_child(beam)
-
-func _start_attack_cooldown() -> void:
-	can_attack = false
-	await get_tree().create_timer(ATTACK_COOLDOWN).timeout
-	can_attack = true
-
-func _start_charged_cooldown() -> void:
-	can_charged_attack = false
-	await get_tree().create_timer(CHARGED_COOLDOWN).timeout
-	can_charged_attack = true
 
 func _physics_process(delta: float) -> void:
 	if not GameManager.is_game_active:
@@ -178,23 +186,20 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("attack") and not is_attacking:
 		attack()
 
-	if Input.is_action_just_pressed("shoot") and can_attack:
+	if Input.is_action_just_pressed("shoot") and is_global_cooldown_ready():
 		shoot_magic()
-		_start_attack_cooldown()
 
 	var magic_pressed = Input.is_action_pressed("magic_attack")
-	if magic_pressed and can_attack and not _is_charging:
+	if magic_pressed and is_global_cooldown_ready() and not _is_charging:
 		_is_charging = true
 		_charge_time = 0.0
 	elif magic_pressed and _is_charging:
 		_charge_time += delta
 	elif not magic_pressed and _is_charging:
-		if _charge_time >= CHARGE_TIME and can_charged_attack:
+		if _charge_time >= CHARGE_TIME and is_global_cooldown_ready():
 			shoot_charged_magic()
-			_start_charged_cooldown()
-		elif can_attack:
+		elif is_global_cooldown_ready():
 			shoot_magic()
-			_start_attack_cooldown()
 		_is_charging = false
 		_charge_time = 0.0
 
@@ -209,23 +214,18 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
-func _draw() -> void:
-	# Desenho da Aura
-	if current_aura_radius > 0:
-		draw_circle(Vector2.ZERO, current_aura_radius, Color(0.3, 0.8, 1.0, current_aura_alpha))
-		draw_arc(Vector2.ZERO, current_aura_radius, 0, TAU, 32, Color(0.8, 0.95, 1.0, current_aura_alpha * 1.5), 2.0)
-	
-	# Desenho do Cooldown
-	if aura_cooldown_timer > 0:
-		var progress = 1.0 - (aura_cooldown_timer / AURA_COOLDOWN)
-		draw_arc(Vector2(0, 35), 10.0, -PI/2, -PI/2 + (progress * TAU), 16, Color(1.0, 1.0, 1.0, 0.75), 3.0)
 
 func _process(delta: float) -> void:
-	if aura_cooldown_timer > 0:
-		aura_cooldown_timer -= delta
-		queue_redraw()
-	if current_aura_radius > 0:
-		queue_redraw()
+	if global_cooldown_timer > 0:
+		global_cooldown_timer -= delta
+		
+		if cooldown_visualizer and global_cooldown_max > 0:
+			var progress = 1.0 - (global_cooldown_timer / global_cooldown_max)
+			cooldown_visualizer.update_cooldown(progress)
+			
+		if global_cooldown_timer <= 0:
+			if cooldown_visualizer:
+				cooldown_visualizer.play_twinkle()
 
 	if velocity.x > 0:
 		facing_right = true
@@ -242,7 +242,7 @@ func _process(delta: float) -> void:
 		if animation.sprite_frames and animation.sprite_frames.has_animation(crouch_anim):
 			animation.play(crouch_anim)
 		else:
-			animation.play("idle1") # placeholder até as animações de agachar serem importadas no SpriteFrames
+			animation.play("idle1")
 	elif is_on_floor():
 		if velocity.x != 0:
 			animation.play("walking2")

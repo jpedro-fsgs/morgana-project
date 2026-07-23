@@ -10,7 +10,7 @@ signal game_over
 signal victory
 signal horde_started
 
-const COUNTDOWN_DURATION: float = 60.0
+const COUNTDOWN_DURATION: float = 15.0
 const HORDE_DURATION: float = 60.0
 const TOTAL_EXPECTED_BATS: float = 45.0
 const DAMAGE_PER_HIT: float = 100.0 / TOTAL_EXPECTED_BATS

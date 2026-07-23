@@ -10,10 +10,10 @@ extends Node2D
 @onready var camera: Camera2D = $Player/Camera2D
 
 const COUNTDOWN_STEPS := [
-	{"text": "3", "color": Color(1, 1, 1), "hold": 0.7},
-	{"text": "2", "color": Color(1, 1, 1), "hold": 0.7},
-	{"text": "1", "color": Color(1, 1, 1), "hold": 0.7},
-	{"text": "DEFENDA A VILA!", "color": Color(1.0, 0.85, 0.3), "hold": 0.9},
+	{"text": "3", "color": Color(1, 1, 1), "hold": 0.2},
+	{"text": "2", "color": Color(1, 1, 1), "hold": 0.2},
+	{"text": "1", "color": Color(1, 1, 1), "hold": 0.2},
+	{"text": "DEFENDA A VILA!", "color": Color(1.0, 0.85, 0.3), "hold": 0.4},
 ]
 
 func _ready() -> void:
