@@ -1,0 +1,62 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/bat.gd" id="1_bat"]
+[ext_resource type="Texture2D" path="res://assets/bat/bat_flying.png" id="2_bat"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bat1"]
+atlas = ExtResource("2_bat")
+region = Rect2(0, 0, 25, 14)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bat2"]
+atlas = ExtResource("2_bat")
+region = Rect2(26, 0, 26, 14)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bat3"]
+atlas = ExtResource("2_bat")
+region = Rect2(56, 0, 22, 14)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bat4"]
+atlas = ExtResource("2_bat")
+region = Rect2(88, 0, 12, 14)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bat5"]
+atlas = ExtResource("2_bat")
+region = Rect2(114, 0, 12, 14)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_bat"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bat1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bat2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bat3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bat4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bat5")
+}],
+"loop": true,
+"name": &"fly",
+"speed": 12.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_bat"]
+radius = 20.0
+
+[node name="Bat" type="CharacterBody2D"]
+script = ExtResource("1_bat")
+
+[node name="Animation" type="AnimatedSprite2D" parent="."]
+scale = Vector2(4, 4)
+sprite_frames = SubResource("SpriteFrames_bat")
+animation = &"fly"
+autoplay = "fly"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_bat")

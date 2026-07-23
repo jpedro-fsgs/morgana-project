@@ -1,0 +1,28 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ai_familiar.gd" id="1_familiar"]
+
+[node name="AIFamiliar" type="Node2D"]
+script = ExtResource("1_familiar")
+
+[node name="Glow" type="Polygon2D" parent="."]
+color = Color(0.6, 0.85, 1, 0.28)
+scale = Vector2(2.2, 2.2)
+polygon = PackedVector2Array(8, 0, 5.6, 5.6, 0, 8, -5.6, 5.6, -8, 0, -5.6, -5.6, 0, -8, 5.6, -5.6)
+
+[node name="Orb" type="Polygon2D" parent="."]
+color = Color(0.75, 0.9, 1, 0.95)
+polygon = PackedVector2Array(8, 0, 5.6, 5.6, 0, 8, -5.6, 5.6, -8, 0, -5.6, -5.6, 0, -8, 5.6, -5.6)
+
+[node name="Sparkles" type="CPUParticles2D" parent="."]
+amount = 10
+lifetime = 0.7
+emitting = true
+direction = Vector2(0, 0)
+spread = 180.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 6.0
+initial_velocity_max = 18.0
+scale_amount_min = 1.0
+scale_amount_max = 2.2
+color = Color(0.7, 0.88, 1, 0.8)

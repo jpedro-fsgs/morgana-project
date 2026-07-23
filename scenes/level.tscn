@@ -2,13 +2,22 @@
 
 [ext_resource type="PackedScene" uid="uid://ofb7ihach6qd" path="res://scenes/background.tscn" id="1_w7c3h"]
 [ext_resource type="PackedScene" uid="uid://bitili646qdbr" path="res://scenes/player.tscn" id="2_w8frs"]
-[ext_resource type="PackedScene" uid="uid://c4iintfv7g16b" path="res://scenes/demon.tscn" id="3_w8frs"]
-[ext_resource type="Script" uid="uid://bmqvf8mqk4xn4" path="res://scripts/enemy_spawner.gd" id="4_spawner"]
+[ext_resource type="PackedScene" path="res://scenes/bat.tscn" id="3_bat"]
+[ext_resource type="Script" path="res://scripts/bat_spawner.gd" id="4_batspawner"]
+[ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="5_hud"]
+[ext_resource type="Script" path="res://scripts/level.gd" id="6_level"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_walls"]
 size = Vector2(100, 2000)
 
+[sub_resource type="LabelSettings" id="LabelSettings_countdown"]
+font_size = 96
+font_color = Color(1, 1, 1, 1)
+outline_size = 10
+outline_color = Color(0, 0, 0, 1)
+
 [node name="Level" type="Node2D" unique_id=595106683]
+script = ExtResource("6_level")
 
 [node name="Background" parent="." unique_id=1603449858 instance=ExtResource("1_w7c3h")]
 
@@ -35,6 +44,33 @@ collision_layer = 2
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall" unique_id=1389360631]
 shape = SubResource("RectangleShape2D_walls")
 
-[node name="EnemySpawner" type="Node2D" parent="." unique_id=798814666]
-script = ExtResource("4_spawner")
-enemy_scene = ExtResource("3_w8frs")
+[node name="BatSpawner" type="Node2D" parent="."]
+script = ExtResource("4_batspawner")
+bat_scene = ExtResource("3_bat")
+
+[node name="HUD" parent="." instance=ExtResource("5_hud")]
+
+[node name="IntroCountdown" type="CanvasLayer" parent="."]
+
+[node name="Dim" type="ColorRect" parent="IntroCountdown"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.35)
+mouse_filter = 2
+
+[node name="CountdownLabel" type="Label" parent="IntroCountdown"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -70.0
+offset_right = 300.0
+offset_bottom = 70.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 96
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "3"
+label_settings = SubResource("LabelSettings_countdown")
