@@ -26,12 +26,15 @@ var is_paralyzed: bool = false
 var _is_charging: bool = false
 var _charge_time: float = 0.0
 var can_charged_attack: bool = true
+var is_attacking: bool = false
+const SWORD_ATTACK_DAMAGE = 100
 
 func _ready() -> void:
 	set_collision_mask_value(2, true) # colide com as paredes invisíveis (Layer 2)
 	hurt_box.body_entered.connect(_on_hurt_box_body_entered)
 	GameManager.game_over.connect(_on_match_ended)
 	GameManager.victory.connect(_on_match_ended)
+	animation.animation_finished.connect(_on_animated_sprite_2d_animation_finished)
 
 func take_damage(amount: int, source: Node = null) -> void:
 	# Reservado para uma futura vida da própria maga, se o jogo evoluir para isso.
@@ -71,6 +74,21 @@ func _shake_camera() -> void:
 func _aim_direction() -> Vector2:
 	# Mira pela direção que a maga está encarando (controle todo pelo teclado)
 	return Vector2.RIGHT if facing_right else Vector2.LEFT
+
+func attack() -> void:
+	if not is_attacking and not is_paralyzed:
+		is_attacking = true
+		animation.play("attack2")
+		
+		if has_node("Hitbox"):
+			var targets = $Hitbox.get_overlapping_bodies()
+			for target in targets:
+				if target != self and target.has_method("take_damage"):
+					target.take_damage(SWORD_ATTACK_DAMAGE, self)
+
+func _on_animated_sprite_2d_animation_finished() -> void:
+	if is_attacking:
+		is_attacking = false
 
 func shoot_magic() -> void:
 	var fireball = fireball_scene.instantiate()
@@ -122,13 +140,16 @@ func _physics_process(delta: float) -> void:
 		velocity.y = JUMP_VELOCITY
 		jump_count += 1
 
-	# Segurar a tecla A (ação "attack") carrega o raio perfurante; soltar rápido dispara o tiro normal
-	if Input.is_action_just_pressed("attack") and can_attack:
+	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and not is_attacking:
+		attack()
+
+	var magic_pressed = Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT)
+	if magic_pressed and can_attack and not _is_charging:
 		_is_charging = true
 		_charge_time = 0.0
-	elif Input.is_action_pressed("attack") and _is_charging:
+	elif magic_pressed and _is_charging:
 		_charge_time += delta
-	elif Input.is_action_just_released("attack") and _is_charging:
+	elif not magic_pressed and _is_charging:
 		if _charge_time >= CHARGE_TIME and can_charged_attack:
 			shoot_charged_magic()
 			_start_charged_cooldown()
@@ -138,8 +159,13 @@ func _physics_process(delta: float) -> void:
 		_is_charging = false
 		_charge_time = 0.0
 
-	# Movimento horizontal (igual ao documento de referência)
+	# Movimento horizontal
 	var direction := Input.get_axis("move_left", "move_right")
+	if direction == 0: # Fallback garantido para WASD caso o Input Map tenha sido quebrado
+		if Input.is_key_pressed(KEY_A): direction -= 1.0
+		if Input.is_key_pressed(KEY_D): direction += 1.0
+		direction = clamp(direction, -1.0, 1.0)
+		
 	if direction:
 		velocity.x = direction * SPEED
 	else:
@@ -151,11 +177,13 @@ func _process(_delta: float) -> void:
 	if velocity.x > 0:
 		facing_right = true
 		animation.flip_h = false
+		if has_node("Hitbox"): $Hitbox.position.x = 40
 	elif velocity.x < 0:
 		facing_right = false
 		animation.flip_h = true
+		if has_node("Hitbox"): $Hitbox.position.x = -40
 
-	if is_paralyzed:
+	if is_paralyzed or is_attacking:
 		return
 
 	if is_on_floor():

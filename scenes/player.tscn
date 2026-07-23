@@ -260,4 +260,10 @@ shape = SubResource("RectangleShape2D_qlg0r")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HurtBox"]
 shape = SubResource("RectangleShape2D_hitbox")
 
+[node name="Hitbox" type="Area2D" parent="."]
+position = Vector2(40, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+shape = SubResource("RectangleShape2D_hitbox")
+
 [node name="AIFamiliar" parent="." instance=ExtResource("0_familiar")]
