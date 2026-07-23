@@ -33,12 +33,26 @@ var can_charged_attack: bool = true
 var is_attacking: bool = false
 const SWORD_ATTACK_DAMAGE = 100
 
+# Aura Attack Variables
+var current_aura_radius: float = 0.0
+var current_aura_alpha: float = 0.0
+var aura_cooldown_timer: float = 0.0
+const AURA_COOLDOWN: float = 1.5
+const AURA_MAX_RADIUS: float = 160.0
+
 func _ready() -> void:
 	set_collision_mask_value(2, true) # colide com as paredes invisíveis (Layer 2)
 	hurt_box.body_entered.connect(_on_hurt_box_body_entered)
 	GameManager.game_over.connect(_on_match_ended)
 	GameManager.victory.connect(_on_match_ended)
 	animation.animation_finished.connect(_on_animated_sprite_2d_animation_finished)
+	
+	# Transforma o Hitbox retangular antigo numa Área Circular 360
+	if has_node("Hitbox/CollisionShape2D"):
+		var aura_shape = CircleShape2D.new()
+		aura_shape.radius = AURA_MAX_RADIUS
+		$Hitbox/CollisionShape2D.shape = aura_shape
+		$Hitbox.position = Vector2.ZERO # Centraliza na maga
 
 func take_damage(amount: int, source: Node = null) -> void:
 	# Reservado para uma futura vida da própria maga, se o jogo evoluir para isso.
@@ -80,15 +94,28 @@ func _aim_direction() -> Vector2:
 	return Vector2.RIGHT if facing_right else Vector2.LEFT
 
 func attack() -> void:
-	if not is_attacking and not is_paralyzed:
+	if not is_attacking and not is_paralyzed and aura_cooldown_timer <= 0.0:
 		is_attacking = true
-		animation.play("attack2")
+		animation.play("attack2") # Mantém como placeholder
+		aura_cooldown_timer = AURA_COOLDOWN
 		
-		if has_node("Hitbox"):
-			var targets = $Hitbox.get_overlapping_bodies()
-			for target in targets:
-				if target != self and target.has_method("take_damage"):
-					target.take_damage(SWORD_ATTACK_DAMAGE, self)
+		# Efeito Visual 360
+		current_aura_radius = 20.0
+		current_aura_alpha = 0.6
+		var tween = create_tween()
+		tween.set_parallel(true)
+		tween.tween_property(self, "current_aura_radius", AURA_MAX_RADIUS, 0.25).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.tween_property(self, "current_aura_alpha", 0.0, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.finished.connect(func(): current_aura_radius = 0.0)
+		
+		# Dano aos inimigos ao redor
+		get_tree().create_timer(0.05).timeout.connect(func():
+			if has_node("Hitbox"):
+				var targets = $Hitbox.get_overlapping_bodies()
+				for target in targets:
+					if target != self and target.has_method("take_damage"):
+						target.take_damage(SWORD_ATTACK_DAMAGE, self)
+		)
 
 func _on_animated_sprite_2d_animation_finished() -> void:
 	if is_attacking:
@@ -182,15 +209,30 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
-func _process(_delta: float) -> void:
+func _draw() -> void:
+	# Desenho da Aura
+	if current_aura_radius > 0:
+		draw_circle(Vector2.ZERO, current_aura_radius, Color(0.3, 0.8, 1.0, current_aura_alpha))
+		draw_arc(Vector2.ZERO, current_aura_radius, 0, TAU, 32, Color(0.8, 0.95, 1.0, current_aura_alpha * 1.5), 2.0)
+	
+	# Desenho do Cooldown
+	if aura_cooldown_timer > 0:
+		var progress = 1.0 - (aura_cooldown_timer / AURA_COOLDOWN)
+		draw_arc(Vector2(0, 35), 10.0, -PI/2, -PI/2 + (progress * TAU), 16, Color(1.0, 1.0, 1.0, 0.75), 3.0)
+
+func _process(delta: float) -> void:
+	if aura_cooldown_timer > 0:
+		aura_cooldown_timer -= delta
+		queue_redraw()
+	if current_aura_radius > 0:
+		queue_redraw()
+
 	if velocity.x > 0:
 		facing_right = true
 		animation.flip_h = false
-		if has_node("Hitbox"): $Hitbox.position.x = 40
 	elif velocity.x < 0:
 		facing_right = false
 		animation.flip_h = true
-		if has_node("Hitbox"): $Hitbox.position.x = -40
 
 	if is_paralyzed or is_attacking:
 		return
