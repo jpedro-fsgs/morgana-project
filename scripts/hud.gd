@@ -84,7 +84,7 @@ func _on_game_over() -> void:
 	_show_result("GAME OVER", "A vila caiu...", Color(0.85, 0.2, 0.2))
 
 func _on_victory() -> void:
-	_show_result("VITÓRIA!", "O sol nasceu. Os morcegos fugiram.", Color(1.0, 0.85, 0.3))
+	_show_result("VITÓRIA!", "O sol nasceu. As trevas recuaram.", Color(1.0, 0.85, 0.3))
 
 func _show_result(title: String, subtitle: String, color: Color) -> void:
 	var tween := create_tween()
@@ -95,8 +95,8 @@ func _show_result(title: String, subtitle: String, color: Color) -> void:
 	result_title.text = title
 	result_title.add_theme_color_override("font_color", color)
 	result_subtitle.text = subtitle
-	stats_label.text = "Morcegos derrotados: %d\nIntegridade final da vila: %d%%\nPontuação final: %d\nRecorde da sessão: %d" % [
-		GameManager.bats_defeated,
+	stats_label.text = "Inimigos derrotados: %d\nIntegridade final da vila: %d%%\nPontuação final: %d\nRecorde da sessão: %d" % [
+		GameManager.enemies_defeated,
 		int(round(GameManager.village_integrity)),
 		GameManager.score,
 		GameManager.high_score

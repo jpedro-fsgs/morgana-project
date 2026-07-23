@@ -16,7 +16,16 @@ const COUNTDOWN_STEPS := [
 	{"text": "DEFENDA A VILA!", "color": Color(1.0, 0.85, 0.3), "hold": 0.4},
 ]
 
+var bat_scene = preload("res://scenes/bat.tscn")
+
 func _ready() -> void:
+	var spawner: EnemySpawner = $EnemySpawner
+	spawner.set_spawn_table([
+		EnemySpawner.SpawnEntry.new(bat_scene, 0.7, "common"),
+		EnemySpawner.SpawnEntry.new(bat_scene, 0.2, "fast"),
+		EnemySpawner.SpawnEntry.new(bat_scene, 0.1, "giant"),
+	])
+
 	GameManager.village_integrity_changed.connect(_on_village_damaged)
 	GameManager.is_game_active = false
 	await _run_intro_countdown()

@@ -75,7 +75,7 @@ func _on_match_ended() -> void:
 func _on_hurt_box_body_entered(body: Node) -> void:
 	if is_paralyzed or not GameManager.is_game_active:
 		return
-	if body.is_in_group("bats"):
+	if body.is_in_group("enemies"):
 		_paralyze()
 
 func _paralyze() -> void:

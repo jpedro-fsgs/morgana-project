@@ -2,7 +2,7 @@ extends Node
 
 signal village_integrity_changed(value: float)
 signal time_changed(time_left: float)
-signal bat_defeated_changed(count: int)
+signal enemy_defeated_changed(count: int)
 signal score_changed(value: int)
 signal combo_changed(multiplier: int, streak: int)
 signal combo_broken
@@ -25,11 +25,9 @@ const COMBO_TIERS := [
 	{"streak": 4, "mult": 3},
 	{"streak": 2, "mult": 2},
 ]
-const BAT_SCORE := {"common": 10, "fast": 20, "giant": 30}
-
+var enemies_defeated: int = 0
 var village_integrity: float = 100.0
 var time_left: float = COUNTDOWN_DURATION
-var bats_defeated: int = 0
 var is_game_active: bool = true
 var speed_multiplier: float = 1.0
 
@@ -45,7 +43,7 @@ func _reset_state() -> void:
 	village_integrity = 100.0
 	time_left = COUNTDOWN_DURATION
 	current_phase = GamePhase.COUNTDOWN
-	bats_defeated = 0
+	enemies_defeated = 0
 	is_game_active = true
 	speed_multiplier = 1.0
 	score = 0
@@ -71,18 +69,17 @@ func _start_horde() -> void:
 	speed_multiplier = 1.25 # Morcegos mais agressivos na Horda
 	horde_started.emit()
 
-func register_bat_defeated(bat_type: String = "common") -> void:
+func register_enemy_defeated(score_value: int = 10) -> void:
 	if not is_game_active:
 		return
-	bats_defeated += 1
-	bat_defeated_changed.emit(bats_defeated)
+	enemies_defeated += 1
+	enemy_defeated_changed.emit(enemies_defeated)
 
 	combo_streak += 1
 	combo_multiplier = _multiplier_for_streak(combo_streak)
 	combo_changed.emit(combo_multiplier, combo_streak)
 
-	var base_score: int = BAT_SCORE.get(bat_type, 10)
-	score += base_score * combo_multiplier
+	score += score_value * combo_multiplier
 	score_changed.emit(score)
 
 func _multiplier_for_streak(streak: int) -> int:
@@ -137,6 +134,6 @@ func restart_match() -> void:
 	_reset_state()
 	village_integrity_changed.emit(village_integrity)
 	time_changed.emit(time_left)
-	bat_defeated_changed.emit(bats_defeated)
+	enemy_defeated_changed.emit(enemies_defeated)
 	score_changed.emit(score)
 	combo_changed.emit(combo_multiplier, combo_streak)

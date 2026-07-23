@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://ofb7ihach6qd" path="res://scenes/background.tscn" id="1_w7c3h"]
 [ext_resource type="PackedScene" uid="uid://bitili646qdbr" path="res://scenes/player.tscn" id="2_w8frs"]
 [ext_resource type="PackedScene" path="res://scenes/bat.tscn" id="3_bat"]
-[ext_resource type="Script" uid="uid://dmv423ghioqib" path="res://scripts/bat_spawner.gd" id="4_batspawner"]
+[ext_resource type="Script" path="res://scripts/enemy_spawner.gd" id="4_enemyspawner"]
 [ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="5_hud"]
 [ext_resource type="Script" uid="uid://bodpsd6r2s6kr" path="res://scripts/level.gd" id="6_level"]
 [ext_resource type="PackedScene" path="res://scenes/orb_pickup.tscn" id="7_orbpickup"]
@@ -75,9 +75,8 @@ position = Vector2(2200, 600)
 [node name="OrbPickup3" parent="." unique_id=146033739 instance=ExtResource("7_orbpickup")]
 position = Vector2(3400, 650)
 
-[node name="BatSpawner" type="Node2D" parent="." unique_id=282253281]
-script = ExtResource("4_batspawner")
-bat_scene = ExtResource("3_bat")
+[node name="EnemySpawner" type="Node2D" parent="." unique_id=282253281]
+script = ExtResource("4_enemyspawner")
 
 [node name="HUD" parent="." unique_id=1914251633 instance=ExtResource("5_hud")]
 

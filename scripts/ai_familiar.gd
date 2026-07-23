@@ -53,7 +53,7 @@ func _update_visual(color: Color, visual_scale: float) -> void:
 
 func _find_target() -> Node2D:
 	# Como essa é uma orbe de combate padrão, ela busca o morcego mais perto
-	return get_nearest_entity_in_radius("bats")
+	return get_nearest_entity_in_radius("enemies")
 
 func _execute_attack(target: Node2D) -> void:
 	var direction := (target.global_position - global_position).normalized()
