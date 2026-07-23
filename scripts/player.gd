@@ -5,13 +5,11 @@ extends CharacterBody2D
 
 # --- Movimentação e pulo (mecânica de plataforma, igual ao documento de referência) ---
 const SPEED = 300.0
-const CROUCH_SPEED = 130.0
 const MAX_JUMPS: int = 4
 # Cada pulo extra impulsiona um pouco menos, para a maga alcançar a horda de
 # morcegos no alto da tela sem jamais encostar na barra de vida (UI) no topo.
 const JUMP_VELOCITIES: Array[float] = [-400.0, -380.0, -350.0, -310.0]
 var jump_count: int = 0
-var is_crouching: bool = false
 
 # --- Sistema de Magia e Base de Tempo ---
 var base_magic_cooldown: float = 1.0 # Tempo base. Alterar isso acelera/desacelera TODAS as magias
@@ -20,17 +18,9 @@ const MAGIC_COOLDOWN_MULT: float = 0.35
 const MAGIC_DAMAGE = 25
 const PARALYSIS_TIME = 1.1 # reduzido de 2.0 para o jogador ficar preso por menos tempo
 
-# Ataque carregado: segurar a tecla A por 1s dispara um raio perfurante (atinge vários morcegos)
-const CHARGE_TIME = 1.0
-const CHARGED_DAMAGE = 40
-const CHARGED_COOLDOWN_MULT: float = 2.0
-
 var fireball_scene = preload("res://scenes/fireball.tscn")
 var facing_right: bool = true
 var is_paralyzed: bool = false
-
-var _is_charging: bool = false
-var _charge_time: float = 0.0
 var is_attacking: bool = false
 
 # Aura Attack Variables
@@ -114,7 +104,7 @@ func _aim_direction() -> Vector2:
 	# Mira pela direção que a maga está encarando (controle todo pelo teclado)
 	return Vector2.RIGHT if facing_right else Vector2.LEFT
 
-func attack() -> void:
+func aura_attack() -> void:
 	if not is_attacking and not is_paralyzed and is_global_cooldown_ready():
 		is_attacking = true
 		animation.play("morgana_attack") # Mantém como placeholder
@@ -138,6 +128,8 @@ func _on_animated_sprite_2d_animation_finished() -> void:
 		is_attacking = false
 
 func shoot_magic() -> void:
+	is_attacking = true
+	animation.play("morgana_attack_2")
 	start_global_cooldown(MAGIC_COOLDOWN_MULT * base_magic_cooldown)
 	var fireball = fireball_scene.instantiate()
 	fireball.shooter = self
@@ -145,17 +137,6 @@ func shoot_magic() -> void:
 	fireball.direction = _aim_direction()
 	fireball.global_position = global_position + fireball.direction * 24.0
 	get_parent().add_child(fireball)
-
-func shoot_charged_magic() -> void:
-	start_global_cooldown(CHARGED_COOLDOWN_MULT * base_magic_cooldown)
-	# Raio perfurante: atinge vários morcegos em linha, dano maior
-	var beam = fireball_scene.instantiate()
-	beam.pierce = true
-	beam.shooter = self
-	beam.damage = CHARGED_DAMAGE
-	beam.direction = _aim_direction()
-	beam.global_position = global_position + beam.direction * 24.0
-	get_parent().add_child(beam)
 
 func _physics_process(delta: float) -> void:
 	if not GameManager.is_game_active:
@@ -170,47 +151,27 @@ func _physics_process(delta: float) -> void:
 	if is_paralyzed:
 		velocity.x = 0
 		move_and_slide()
-		_is_charging = false
-		_charge_time = 0.0
 		return
 
 	# Pulo (até 4 pulos - seta ▲ / W - cada um um pouco mais baixo que o anterior
 	# para a maga alcançar a horda de morcegos sem tocar a barra de vida no topo)
-	if Input.is_action_just_pressed("jump") and jump_count < MAX_JUMPS and not is_crouching:
+	if Input.is_action_just_pressed("jump") and jump_count < MAX_JUMPS:
 		velocity.y = JUMP_VELOCITIES[jump_count]
 		jump_count += 1
 
-	# Agachar (S / ▼): reduz a velocidade e a hurtbox, útil para passar sob morcegos rasantes
-	is_crouching = Input.is_action_pressed("move_down") and is_on_floor() and not is_attacking
-
 	if Input.is_action_just_pressed("attack") and not is_attacking:
-		attack()
+		aura_attack()
 
 	if Input.is_action_just_pressed("shoot") and is_global_cooldown_ready():
 		shoot_magic()
 
-	var magic_pressed = Input.is_action_pressed("magic_attack")
-	if magic_pressed and is_global_cooldown_ready() and not _is_charging:
-		_is_charging = true
-		_charge_time = 0.0
-	elif magic_pressed and _is_charging:
-		_charge_time += delta
-	elif not magic_pressed and _is_charging:
-		if _charge_time >= CHARGE_TIME and is_global_cooldown_ready():
-			shoot_charged_magic()
-		elif is_global_cooldown_ready():
-			shoot_magic()
-		_is_charging = false
-		_charge_time = 0.0
-
 	# Movimento horizontal
 	var direction := Input.get_axis("move_left", "move_right")
-	var current_speed := CROUCH_SPEED if is_crouching else SPEED
 
 	if direction:
-		velocity.x = direction * current_speed
+		velocity.x = direction * SPEED
 	else:
-		velocity.x = move_toward(velocity.x, 0, current_speed)
+		velocity.x = move_toward(velocity.x, 0, SPEED)
 
 	move_and_slide()
 
@@ -237,13 +198,7 @@ func _process(delta: float) -> void:
 	if is_paralyzed or is_attacking:
 		return
 
-	if is_crouching:
-		var crouch_anim := "crouching_walk" if velocity.x != 0 else "crouching_idle"
-		if animation.sprite_frames and animation.sprite_frames.has_animation(crouch_anim):
-			animation.play(crouch_anim)
-		else:
-			animation.play("idle1")
-	elif is_on_floor():
+	if is_on_floor():
 		if velocity.x != 0:
 			animation.play("morgana_walking2")
 		else:

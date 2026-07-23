@@ -81,8 +81,8 @@ layout_mode = 2
 
 [node name="ControlsLabel" type="Label" parent="VBox" unique_id=2029820295]
 layout_mode = 2
-text = "A / D / ◄ ►  Mover     W / ▲  Pular (até 4x)     S / ▼  Agachar
-X ou Espaço  Tiro Mágico     Botão Esquerdo  Aura 360º     Botão Direito  Raio Perfurante (segure)"
+text = "A / D / ◄ ►  Mover     W / ▲  Pular (até 4x)
+X ou Espaço  Tiro Mágico     Botão Esquerdo  Aura 360º"
 label_settings = SubResource("LabelSettings_controls")
 horizontal_alignment = 1
 
