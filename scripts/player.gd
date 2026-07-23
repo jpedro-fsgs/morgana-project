@@ -140,10 +140,10 @@ func _physics_process(delta: float) -> void:
 		velocity.y = JUMP_VELOCITY
 		jump_count += 1
 
-	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and not is_attacking:
+	if Input.is_action_just_pressed("attack") and not is_attacking:
 		attack()
 
-	var magic_pressed = Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT)
+	var magic_pressed = Input.is_action_pressed("magic_attack")
 	if magic_pressed and can_attack and not _is_charging:
 		_is_charging = true
 		_charge_time = 0.0
@@ -161,10 +161,6 @@ func _physics_process(delta: float) -> void:
 
 	# Movimento horizontal
 	var direction := Input.get_axis("move_left", "move_right")
-	if direction == 0: # Fallback garantido para WASD caso o Input Map tenha sido quebrado
-		if Input.is_key_pressed(KEY_A): direction -= 1.0
-		if Input.is_key_pressed(KEY_D): direction += 1.0
-		direction = clamp(direction, -1.0, 1.0)
 		
 	if direction:
 		velocity.x = direction * SPEED

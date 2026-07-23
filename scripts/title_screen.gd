@@ -1,8 +1,25 @@
 extends Control
 
+const KEYBOARD_CONTROLS = "A / D / ◄ ►  Mover     W / ▲ / Espaço  Pular (até 3x)\nBotão Esquerdo  Espada     Botão Direito  Magia (segure p/ carregar)"
+const JOYPAD_CONTROLS = "Analógico / D-Pad  Mover     Botão Inferior (A/Cruz)  Pular\nEsquerdo (X/Quadrado)  Espada     Superior (Y/Triângulo)  Magia (segure)"
+
+@onready var controls_label: Label = $VBox/ControlsLabel
+
 func _ready() -> void:
 	$VBox/StartButton.pressed.connect(_on_start_pressed)
 	$VBox/StartButton.grab_focus()
+	
+	Input.joy_connection_changed.connect(_on_joy_connection_changed)
+	_update_controls_text()
+
+func _update_controls_text() -> void:
+	if Input.get_connected_joypads().size() > 0:
+		controls_label.text = JOYPAD_CONTROLS
+	else:
+		controls_label.text = KEYBOARD_CONTROLS
+
+func _on_joy_connection_changed(_device: int, _connected: bool) -> void:
+	_update_controls_text()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_accept"):
