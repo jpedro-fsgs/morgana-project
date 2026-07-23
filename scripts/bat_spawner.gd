@@ -7,14 +7,20 @@ class_name BatSpawner
 @export var spawn_y_max: float = 780.0    # base da faixa de voo (perto do chão da vila)
 @export var auto_start: bool = true
 
+const COUNTDOWN_SPAWN_INTERVAL: float = 4.0
+const HORDE_SPAWN_INTERVAL_MIN: float = 0.35
+const HORDE_SPAWN_INTERVAL_MAX: float = 0.65
+
 # Distribuição de tipos do documento: comum 70%, rápido 20%, gigante 10%
 const TYPE_WEIGHTS := {"common": 0.7, "fast": 0.2, "giant": 0.1}
 
 var _spawning: bool = false
+var _current_timer: SceneTreeTimer = null
 
 func _ready() -> void:
 	GameManager.game_over.connect(stop_spawning)
 	GameManager.victory.connect(stop_spawning)
+	GameManager.horde_started.connect(_on_horde_started)
 
 	if auto_start:
 		start_spawning()
@@ -28,14 +34,26 @@ func start_spawning() -> void:
 func stop_spawning() -> void:
 	_spawning = false
 
+func _on_horde_started() -> void:
+	# Interrompe a espera longa de 4s para começar o bombardeio frenético na mesma hora
+	if _current_timer:
+		_current_timer.time_left = 0.0
+
 func _spawn_loop() -> void:
 	while _spawning:
-		var stage: Dictionary = GameManager.get_current_stage()
-		await get_tree().create_timer(randf_range(stage.spawn_min, stage.spawn_max)).timeout
+		var interval := COUNTDOWN_SPAWN_INTERVAL
+		if GameManager.current_phase == GameManager.GamePhase.HORDE:
+			interval = randf_range(HORDE_SPAWN_INTERVAL_MIN, HORDE_SPAWN_INTERVAL_MAX)
+		
+		_current_timer = get_tree().create_timer(interval)
+		await _current_timer.timeout
+		_current_timer = null
+		
 		if not _spawning:
 			break
 		if not GameManager.is_game_active:
 			continue # partida ainda não começou (ex.: contagem regressiva inicial) ou está pausada
+			
 		_spawn_bat()
 
 func _spawn_bat() -> void:

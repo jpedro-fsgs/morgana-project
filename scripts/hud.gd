@@ -50,19 +50,20 @@ var _last_pulsed_second: int = -1
 func _on_time_changed(time_left: float) -> void:
 	var minutes := int(time_left) / 60
 	var seconds := int(time_left) % 60
-	timer_label.text = "%02d:%02d" % [minutes, seconds]
-
-	# A contagem regressiva "grita" mais forte conforme o tempo acaba, reforçando o tema.
-	if time_left <= 10.0:
-		timer_label.add_theme_color_override("font_color", Color(1.0, 0.25, 0.25))
-		var whole_second := int(ceil(time_left))
-		if whole_second != _last_pulsed_second:
-			_last_pulsed_second = whole_second
-			_pulse_timer()
-	elif time_left <= 30.0:
-		timer_label.add_theme_color_override("font_color", Color(1.0, 0.65, 0.25))
-	else:
+	
+	if GameManager.current_phase == GameManager.GamePhase.COUNTDOWN:
+		timer_label.text = "Treino: %02d:%02d" % [minutes, seconds]
 		timer_label.remove_theme_color_override("font_color")
+	else:
+		timer_label.text = "HORDA: %02d:%02d" % [minutes, seconds]
+		timer_label.add_theme_color_override("font_color", Color(1.0, 0.25, 0.25))
+		
+		# Apenas pulsa dramático nos últimos 10 segundos da Horda
+		if time_left <= 10.0:
+			var whole_second := int(ceil(time_left))
+			if whole_second != _last_pulsed_second:
+				_last_pulsed_second = whole_second
+				_pulse_timer()
 
 func _pulse_timer() -> void:
 	var tween := create_tween()
