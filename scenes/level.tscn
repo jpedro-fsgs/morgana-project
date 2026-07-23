@@ -3,17 +3,16 @@
 [ext_resource type="PackedScene" uid="uid://ofb7ihach6qd" path="res://scenes/background.tscn" id="1_w7c3h"]
 [ext_resource type="PackedScene" uid="uid://bitili646qdbr" path="res://scenes/player.tscn" id="2_w8frs"]
 [ext_resource type="PackedScene" path="res://scenes/bat.tscn" id="3_bat"]
-[ext_resource type="Script" path="res://scripts/bat_spawner.gd" id="4_batspawner"]
+[ext_resource type="Script" uid="uid://dmv423ghioqib" path="res://scripts/bat_spawner.gd" id="4_batspawner"]
 [ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="5_hud"]
-[ext_resource type="Script" path="res://scripts/level.gd" id="6_level"]
-[ext_resource type="PackedScene" uid="uid://dp642q3yqk0p" path="res://scenes/orb_pickup.tscn" id="7_orbpickup"]
+[ext_resource type="Script" uid="uid://bodpsd6r2s6kr" path="res://scripts/level.gd" id="6_level"]
+[ext_resource type="PackedScene" path="res://scenes/orb_pickup.tscn" id="7_orbpickup"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_walls"]
 size = Vector2(100, 2000)
 
 [sub_resource type="LabelSettings" id="LabelSettings_countdown"]
 font_size = 96
-font_color = Color(1, 1, 1, 1)
 outline_size = 10
 outline_color = Color(0, 0, 0, 1)
 
@@ -33,7 +32,6 @@ limit_top = 348
 limit_right = 4200
 limit_bottom = 780
 position_smoothing_enabled = true
-position_smoothing_speed = 5.0
 
 [node name="Gate" type="StaticBody2D" parent="." unique_id=102137214]
 position = Vector2(200, 600)
@@ -42,14 +40,14 @@ collision_layer = 2
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Gate" unique_id=1587147032]
 shape = SubResource("RectangleShape2D_walls")
 
-[node name="GateVisual" type="ColorRect" parent="Gate"]
+[node name="GateVisual" type="ColorRect" parent="Gate" unique_id=1755341085]
 offset_left = -30.0
 offset_top = -400.0
 offset_right = 30.0
 offset_bottom = 400.0
 color = Color(0.4, 0.25, 0.1, 0.85)
 
-[node name="GateLabel" type="Label" parent="Gate/GateVisual"]
+[node name="GateLabel" type="Label" parent="Gate/GateVisual" unique_id=22099694]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -68,30 +66,32 @@ collision_layer = 2
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall" unique_id=1389360631]
 shape = SubResource("RectangleShape2D_walls")
 
-[node name="OrbPickup" parent="." instance=ExtResource("7_orbpickup")]
+[node name="OrbPickup" parent="." unique_id=485721575 instance=ExtResource("7_orbpickup")]
 position = Vector2(1000, 650)
 
-[node name="OrbPickup2" parent="." instance=ExtResource("7_orbpickup")]
+[node name="OrbPickup2" parent="." unique_id=1633735816 instance=ExtResource("7_orbpickup")]
 position = Vector2(2200, 600)
 
-[node name="OrbPickup3" parent="." instance=ExtResource("7_orbpickup")]
+[node name="OrbPickup3" parent="." unique_id=146033739 instance=ExtResource("7_orbpickup")]
 position = Vector2(3400, 650)
 
-[node name="BatSpawner" type="Node2D" parent="."]
+[node name="BatSpawner" type="Node2D" parent="." unique_id=282253281]
 script = ExtResource("4_batspawner")
 bat_scene = ExtResource("3_bat")
 
-[node name="HUD" parent="." instance=ExtResource("5_hud")]
+[node name="HUD" parent="." unique_id=1914251633 instance=ExtResource("5_hud")]
 
-[node name="IntroCountdown" type="CanvasLayer" parent="."]
+[node name="IntroCountdown" type="CanvasLayer" parent="." unique_id=1081364165]
 
-[node name="Dim" type="ColorRect" parent="IntroCountdown"]
+[node name="Dim" type="ColorRect" parent="IntroCountdown" unique_id=1036722341]
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0, 0, 0, 0.35)
 mouse_filter = 2
+color = Color(0, 0, 0, 0.35)
 
-[node name="CountdownLabel" type="Label" parent="IntroCountdown"]
+[node name="CountdownLabel" type="Label" parent="IntroCountdown" unique_id=61243695]
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -103,7 +103,7 @@ offset_bottom = 70.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 96
-horizontal_alignment = 1
-vertical_alignment = 1
 text = "3"
 label_settings = SubResource("LabelSettings_countdown")
+horizontal_alignment = 1
+vertical_alignment = 1

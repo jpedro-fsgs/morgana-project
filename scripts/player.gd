@@ -117,7 +117,7 @@ func _aim_direction() -> Vector2:
 func attack() -> void:
 	if not is_attacking and not is_paralyzed and is_global_cooldown_ready():
 		is_attacking = true
-		animation.play("attack2") # Mantém como placeholder
+		animation.play("morgana_attack") # Mantém como placeholder
 		start_global_cooldown(AURA_COOLDOWN_MULT * base_magic_cooldown)
 		
 		# Efeito Visual 360
@@ -245,8 +245,8 @@ func _process(delta: float) -> void:
 			animation.play("idle1")
 	elif is_on_floor():
 		if velocity.x != 0:
-			animation.play("walking2")
+			animation.play("morgana_walking2")
 		else:
-			animation.play("idle2")
+			animation.play("morgana_idle")
 	else:
-		animation.play("jump")
+		animation.play("morgana_jump")
