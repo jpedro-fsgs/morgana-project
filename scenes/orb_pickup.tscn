@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://dp642q3yqk0p"]
+
+[ext_resource type="Script" path="res://scripts/orb_pickup.gd" id="1_r4x2a"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_21t6n"]
+radius = 40.0
+
+[node name="OrbPickup" type="Area2D"]
+collision_layer = 0
+script = ExtResource("1_r4x2a")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_21t6n")
+
+[node name="Visuals" type="Node2D" parent="."]
+scale = Vector2(2.5, 2.5)
+
+[node name="Glow" type="Polygon2D" parent="Visuals"]
+color = Color(0.6, 0.85, 1, 0.28)
+scale = Vector2(2.2, 2.2)
+polygon = PackedVector2Array(8, 0, 5.6, 5.6, 0, 8, -5.6, 5.6, -8, 0, -5.6, -5.6, 0, -8, 5.6, -5.6)
+
+[node name="Orb" type="Polygon2D" parent="Visuals"]
+color = Color(0.75, 0.9, 1, 0.95)
+polygon = PackedVector2Array(8, 0, 5.6, 5.6, 0, 8, -5.6, 5.6, -8, 0, -5.6, -5.6, 0, -8, 5.6, -5.6)
+
+[node name="Sparkles" type="CPUParticles2D" parent="Visuals"]
+amount = 10
+lifetime = 0.7
+direction = Vector2(0, 0)
+spread = 180.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 6.0
+initial_velocity_max = 18.0
+scale_amount_min = 1.0
+scale_amount_max = 2.2
+color = Color(0.7, 0.88, 1, 0.8)

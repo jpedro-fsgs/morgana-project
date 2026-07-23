@@ -269,5 +269,3 @@ shape = SubResource("RectangleShape2D_hitbox")
 
 [node name="OrbManager" type="Node2D" parent="." unique_id=1855095270]
 script = ExtResource("6_orbmanager")
-
-[node name="AIFamiliar" parent="OrbManager" unique_id=996570130 instance=ExtResource("0_familiar")]

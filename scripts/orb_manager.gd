@@ -18,3 +18,7 @@ func _organize_orbs() -> void:
 	var angle_step = TAU / count
 	for i in range(count):
 		orbs[i].orbit_offset = i * angle_step
+
+func add_orb(orb: OrbBase) -> void:
+	add_child(orb)
+	call_deferred("_organize_orbs")

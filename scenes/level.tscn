@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://scripts/bat_spawner.gd" id="4_batspawner"]
 [ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="5_hud"]
 [ext_resource type="Script" path="res://scripts/level.gd" id="6_level"]
+[ext_resource type="PackedScene" uid="uid://dp642q3yqk0p" path="res://scenes/orb_pickup.tscn" id="7_orbpickup"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_walls"]
 size = Vector2(100, 2000)
@@ -66,6 +67,15 @@ collision_layer = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall" unique_id=1389360631]
 shape = SubResource("RectangleShape2D_walls")
+
+[node name="OrbPickup" parent="." instance=ExtResource("7_orbpickup")]
+position = Vector2(1000, 650)
+
+[node name="OrbPickup2" parent="." instance=ExtResource("7_orbpickup")]
+position = Vector2(2200, 600)
+
+[node name="OrbPickup3" parent="." instance=ExtResource("7_orbpickup")]
+position = Vector2(3400, 650)
 
 [node name="BatSpawner" type="Node2D" parent="."]
 script = ExtResource("4_batspawner")
