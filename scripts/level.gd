@@ -7,7 +7,7 @@ extends Node2D
 
 @onready var intro_layer: CanvasLayer = $IntroCountdown
 @onready var countdown_label: Label = $IntroCountdown/CountdownLabel
-@onready var camera: Camera2D = $Camera2D
+@onready var camera: Camera2D = $Player/Camera2D
 
 const COUNTDOWN_STEPS := [
 	{"text": "3", "color": Color(1, 1, 1), "hold": 0.7},

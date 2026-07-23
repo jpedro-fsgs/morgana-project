@@ -3,7 +3,7 @@ extends CharacterBody2D
 @onready var animation: AnimatedSprite2D = $Animation
 @onready var collision: CollisionShape2D = $CollisionShape2D
 
-const LEFT_DESPAWN_X: float = 130.0  # posição x onde o morcego "entra na vila"
+const GATE_X: float = 200.0  # posição x onde o morcego atinge o portão
 
 # --- Tipos de morcego (documento de design): comum 70%, rápido 20%, gigante 10% ---
 const TYPE_CONFIG := {
@@ -109,5 +109,5 @@ func _physics_process(_delta: float) -> void:
 	velocity = Vector2(-SPEED * GameManager.speed_multiplier, 0)
 	move_and_slide()
 
-	if global_position.x <= LEFT_DESPAWN_X:
+	if global_position.x <= GATE_X:
 		_reach_village()

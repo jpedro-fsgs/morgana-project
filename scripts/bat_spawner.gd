@@ -2,7 +2,7 @@ extends Node2D
 class_name BatSpawner
 
 @export var bat_scene: PackedScene
-@export var spawn_x: float = 1050.0       # fora da tela, à direita
+@export var spawn_x_offset: float = 600.0   # distância à direita da câmera
 @export var spawn_y_min: float = 400.0    # topo da faixa de voo
 @export var spawn_y_max: float = 780.0    # base da faixa de voo (perto do chão da vila)
 @export var auto_start: bool = true
@@ -45,7 +45,10 @@ func _spawn_bat() -> void:
 
 	var bat = bat_scene.instantiate()
 	bat.setup(_pick_bat_type())
-	bat.global_position = Vector2(spawn_x, randf_range(spawn_y_min, spawn_y_max))
+	var camera = get_viewport().get_camera_2d()
+	var cam_x = camera.global_position.x if camera else 576.0
+	var actual_spawn_x = cam_x + spawn_x_offset
+	bat.global_position = Vector2(actual_spawn_x, randf_range(spawn_y_min, spawn_y_max))
 	get_parent().call_deferred("add_child", bat)
 
 func _pick_bat_type() -> String:
