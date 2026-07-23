@@ -8,15 +8,24 @@ signal combo_changed(multiplier: int, streak: int)
 signal combo_broken
 signal game_over
 signal victory
-signal horde_started
+signal wave_started(wave_num: int)
+signal preparation_started(wave_num: int)
 
-const COUNTDOWN_DURATION: float = 15.0
-const HORDE_DURATION: float = 60.0
-const TOTAL_EXPECTED_BATS: float = 45.0
+const WAVES_CONFIG = [
+	{ "prep_time": 15.0, "wave_time": 60.0, "difficulty_mult": 1.0 },
+	{ "prep_time": 12.0, "wave_time": 75.0, "difficulty_mult": 1.25 },
+	{ "prep_time": 10.0, "wave_time": 90.0, "difficulty_mult": 1.5 },
+	{ "prep_time": 10.0, "wave_time": 120.0, "difficulty_mult": 1.8 },
+	{ "prep_time": 5.0,  "wave_time": 150.0, "difficulty_mult": 2.2 }
+]
+
+const TOTAL_EXPECTED_BATS: float = 200.0
 const DAMAGE_PER_HIT: float = 100.0 / TOTAL_EXPECTED_BATS
 
-enum GamePhase { COUNTDOWN, HORDE, ENDED }
-var current_phase: GamePhase = GamePhase.COUNTDOWN
+enum GamePhase { PREPARATION, WAVE, ENDED }
+var current_phase: GamePhase = GamePhase.PREPARATION
+var current_wave_index: int = 0
+var wave_difficulty_multiplier: float = 1.0
 
 const COMBO_TIERS := [
 	{"streak": 14, "mult": 10},
@@ -27,7 +36,7 @@ const COMBO_TIERS := [
 ]
 var enemies_defeated: int = 0
 var village_integrity: float = 100.0
-var time_left: float = COUNTDOWN_DURATION
+var time_left: float = WAVES_CONFIG[0].prep_time
 var is_game_active: bool = true
 var speed_multiplier: float = 1.0
 
@@ -41,8 +50,10 @@ func _ready() -> void:
 
 func _reset_state() -> void:
 	village_integrity = 100.0
-	time_left = COUNTDOWN_DURATION
-	current_phase = GamePhase.COUNTDOWN
+	time_left = WAVES_CONFIG[0].prep_time
+	current_phase = GamePhase.PREPARATION
+	current_wave_index = 0
+	wave_difficulty_multiplier = 1.0
 	enemies_defeated = 0
 	is_game_active = true
 	speed_multiplier = 1.0
@@ -58,16 +69,27 @@ func _process(delta: float) -> void:
 	time_changed.emit(time_left)
 
 	if time_left <= 0.0:
-		if current_phase == GamePhase.COUNTDOWN:
-			_start_horde()
-		elif current_phase == GamePhase.HORDE:
-			_trigger_victory()
+		if current_phase == GamePhase.PREPARATION:
+			_start_wave()
+		elif current_phase == GamePhase.WAVE:
+			_end_wave()
 
-func _start_horde() -> void:
-	current_phase = GamePhase.HORDE
-	time_left = HORDE_DURATION
-	speed_multiplier = 1.25 # Morcegos mais agressivos na Horda
-	horde_started.emit()
+func _start_wave() -> void:
+	current_phase = GamePhase.WAVE
+	var config = WAVES_CONFIG[current_wave_index]
+	time_left = config.wave_time
+	wave_difficulty_multiplier = config.difficulty_mult
+	speed_multiplier = wave_difficulty_multiplier
+	wave_started.emit(current_wave_index + 1)
+
+func _end_wave() -> void:
+	current_wave_index += 1
+	if current_wave_index >= WAVES_CONFIG.size():
+		_trigger_victory()
+	else:
+		current_phase = GamePhase.PREPARATION
+		time_left = WAVES_CONFIG[current_wave_index].prep_time
+		preparation_started.emit(current_wave_index + 1)
 
 func register_enemy_defeated(score_value: int = 10) -> void:
 	if not is_game_active:

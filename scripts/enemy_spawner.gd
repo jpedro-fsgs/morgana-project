@@ -22,7 +22,6 @@ enum SpawnMode { CAMERA_RELATIVE, ABSOLUTE }
 @export var randomize_y: bool = true
 
 ## --- Configuração de Tempo por Fase ---
-@export var countdown_interval: float = 4.0
 @export var horde_interval_min: float = 0.35
 @export var horde_interval_max: float = 0.65
 @export var auto_start: bool = true
@@ -34,7 +33,7 @@ var _current_timer: SceneTreeTimer = null
 func _ready() -> void:
 	GameManager.game_over.connect(stop_spawning)
 	GameManager.victory.connect(stop_spawning)
-	GameManager.horde_started.connect(_on_horde_started)
+	GameManager.wave_started.connect(_on_wave_started)
 	if auto_start:
 		start_spawning()
 
@@ -50,12 +49,18 @@ func start_spawning() -> void:
 func stop_spawning() -> void:
 	_spawning = false
 
-func _on_horde_started() -> void:
+func _on_wave_started(_wave_num: int) -> void:
 	if _current_timer:
 		_current_timer.time_left = 0.0
 
 func _spawn_loop() -> void:
 	while _spawning:
+		if GameManager.current_phase == GameManager.GamePhase.PREPARATION:
+			_current_timer = get_tree().create_timer(9999.0)
+			await _current_timer.timeout
+			_current_timer = null
+			continue
+			
 		var interval := _get_current_interval()
 		_current_timer = get_tree().create_timer(interval)
 		await _current_timer.timeout
@@ -67,9 +72,8 @@ func _spawn_loop() -> void:
 		spawn_enemy()
 
 func _get_current_interval() -> float:
-	if GameManager.current_phase == GameManager.GamePhase.HORDE:
-		return randf_range(horde_interval_min, horde_interval_max)
-	return countdown_interval
+	var mult = GameManager.wave_difficulty_multiplier
+	return randf_range(horde_interval_min / mult, horde_interval_max / mult)
 
 ## Método público — pode ser chamado externamente para spawns "scriptados"
 func spawn_enemy(override_entry: SpawnEntry = null) -> Node:

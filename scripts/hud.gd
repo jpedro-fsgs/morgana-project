@@ -51,11 +51,11 @@ func _on_time_changed(time_left: float) -> void:
 	var minutes := int(time_left) / 60
 	var seconds := int(time_left) % 60
 	
-	if GameManager.current_phase == GameManager.GamePhase.COUNTDOWN:
-		timer_label.text = "Treino: %02d:%02d" % [minutes, seconds]
+	if GameManager.current_phase == GameManager.GamePhase.PREPARATION:
+		timer_label.text = "PREPARAÇÃO: %02d:%02d" % [minutes, seconds]
 		timer_label.remove_theme_color_override("font_color")
 	else:
-		timer_label.text = "HORDA: %02d:%02d" % [minutes, seconds]
+		timer_label.text = "WAVE %d: %02d:%02d" % [GameManager.current_wave_index + 1, minutes, seconds]
 		timer_label.add_theme_color_override("font_color", Color(1.0, 0.25, 0.25))
 		
 		# Apenas pulsa dramático nos últimos 10 segundos da Horda

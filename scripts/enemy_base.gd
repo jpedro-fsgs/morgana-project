@@ -22,6 +22,12 @@ func _ready() -> void:
 	GameManager.victory.connect(_on_victory)
 	_enemy_ready()  # hook para filhos
 
+	var mult = GameManager.wave_difficulty_multiplier
+	max_hp = int(max_hp * mult)
+	hp = max_hp
+	move_speed = move_speed * mult
+	defeat_score = int(defeat_score * mult)
+
 ## Hook virtual — filhos sobrescrevem para inicialização extra
 func _enemy_ready() -> void:
 	pass
