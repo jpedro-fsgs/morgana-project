@@ -71,7 +71,7 @@ autowrap_mode = 2
 
 [node name="SubtitleLabel" type="Label" parent="VBox" unique_id=1271997949]
 layout_mode = 2
-text = "A contagem regressiva até o amanhecer começou. Sobreviva por 3 minutos."
+text = "Defenda o castelo de uma horda de morcegos antes do sol nascer.\nA contagem regressiva começou: resista por 3 minutos."
 label_settings = SubResource("LabelSettings_subtitle")
 horizontal_alignment = 1
 
@@ -81,8 +81,8 @@ layout_mode = 2
 
 [node name="ControlsLabel" type="Label" parent="VBox" unique_id=2029820295]
 layout_mode = 2
-text = "A / D / ◄ ►  Mover     W / ▲ / Espaço  Pular (até 3x)
-Botão Esquerdo  Espada     Botão Direito  Magia (segure p/ carregar)"
+text = "A / D / ◄ ►  Mover     W / ▲  Pular (até 4x)     S / ▼  Agachar
+X ou Espaço  Atirar     Botão Esquerdo  Espada     Botão Direito  Magia (segure p/ carregar)"
 label_settings = SubResource("LabelSettings_controls")
 horizontal_alignment = 1
 

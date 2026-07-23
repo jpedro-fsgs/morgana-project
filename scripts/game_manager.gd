@@ -114,6 +114,12 @@ func _break_combo() -> void:
 	combo_broken.emit()
 	combo_changed.emit(combo_multiplier, combo_streak)
 
+func heal_village(amount: float) -> void:
+	if not is_game_active:
+		return
+	village_integrity = min(100.0, village_integrity + amount)
+	village_integrity_changed.emit(village_integrity)
+
 func damage_village(hits: float = 1.0) -> void:
 	if not is_game_active:
 		return

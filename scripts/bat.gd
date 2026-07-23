@@ -54,6 +54,10 @@ func die() -> void:
 	velocity = Vector2.ZERO
 	collision.set_deferred("disabled", true)
 	GameManager.register_bat_defeated(bat_type)
+	if bat_type == "giant":
+		# O morcego gigante é o mais perigoso (2 mordidas) e o mais difícil de matar;
+		# derrotá-lo devolve um pouco de integridade à vila, recompensando o risco.
+		GameManager.heal_village(2.0)
 	_dissolve_into_smoke()
 
 func _dissolve_into_smoke() -> void:

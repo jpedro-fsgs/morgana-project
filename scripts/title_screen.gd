@@ -1,7 +1,7 @@
 extends Control
 
-const KEYBOARD_CONTROLS = "A / D / ◄ ►  Mover     W / ▲ / Espaço  Pular (até 3x)\nBotão Esquerdo  Espada     Botão Direito  Magia (segure p/ carregar)"
-const JOYPAD_CONTROLS = "Analógico / D-Pad  Mover     Botão Inferior (A/Cruz)  Pular\nEsquerdo (X/Quadrado)  Espada     Superior (Y/Triângulo)  Magia (segure)"
+const KEYBOARD_CONTROLS = "A / D / ◄ ►  Mover     W / ▲  Pular (até 4x, sem tocar a barra de vida)     S / ▼  Agachar\nX ou Espaço  Atirar     Botão Esquerdo  Espada     Botão Direito  Magia (segure p/ carregar)"
+const JOYPAD_CONTROLS = "Analógico / D-Pad  Mover     Botão Inferior (A/Cruz)  Pular (até 4x)     D-Pad ▼  Agachar\nDireito (X/Quadrado)  Atirar     Esquerdo (X/Quadrado)  Espada     Superior (Y/Triângulo)  Magia (segure)"
 
 @onready var controls_label: Label = $VBox/ControlsLabel
 

@@ -5,9 +5,13 @@ extends CharacterBody2D
 
 # --- Movimentação e pulo (mecânica de plataforma, igual ao documento de referência) ---
 const SPEED = 300.0
-const JUMP_VELOCITY = -400.0
-const MAX_JUMPS: int = 3
+const CROUCH_SPEED = 130.0
+const MAX_JUMPS: int = 4
+# Cada pulo extra impulsiona um pouco menos, para a maga alcançar a horda de
+# morcegos no alto da tela sem jamais encostar na barra de vida (UI) no topo.
+const JUMP_VELOCITIES: Array[float] = [-400.0, -380.0, -350.0, -310.0]
 var jump_count: int = 0
+var is_crouching: bool = false
 
 const ATTACK_COOLDOWN = 0.35
 const MAGIC_DAMAGE = 25
@@ -135,13 +139,21 @@ func _physics_process(delta: float) -> void:
 		_charge_time = 0.0
 		return
 
-	# Pulo (até 3 pulos, igual ao documento de referência)
-	if Input.is_action_just_pressed("jump") and jump_count < MAX_JUMPS:
-		velocity.y = JUMP_VELOCITY
+	# Pulo (até 4 pulos - seta ▲ / W - cada um um pouco mais baixo que o anterior
+	# para a maga alcançar a horda de morcegos sem tocar a barra de vida no topo)
+	if Input.is_action_just_pressed("jump") and jump_count < MAX_JUMPS and not is_crouching:
+		velocity.y = JUMP_VELOCITIES[jump_count]
 		jump_count += 1
+
+	# Agachar (S / ▼): reduz a velocidade e a hurtbox, útil para passar sob morcegos rasantes
+	is_crouching = Input.is_action_pressed("move_down") and is_on_floor() and not is_attacking
 
 	if Input.is_action_just_pressed("attack") and not is_attacking:
 		attack()
+
+	if Input.is_action_just_pressed("shoot") and can_attack:
+		shoot_magic()
+		_start_attack_cooldown()
 
 	var magic_pressed = Input.is_action_pressed("magic_attack")
 	if magic_pressed and can_attack and not _is_charging:
@@ -161,11 +173,12 @@ func _physics_process(delta: float) -> void:
 
 	# Movimento horizontal
 	var direction := Input.get_axis("move_left", "move_right")
-		
+	var current_speed := CROUCH_SPEED if is_crouching else SPEED
+
 	if direction:
-		velocity.x = direction * SPEED
+		velocity.x = direction * current_speed
 	else:
-		velocity.x = move_toward(velocity.x, 0, SPEED)
+		velocity.x = move_toward(velocity.x, 0, current_speed)
 
 	move_and_slide()
 
@@ -182,7 +195,13 @@ func _process(_delta: float) -> void:
 	if is_paralyzed or is_attacking:
 		return
 
-	if is_on_floor():
+	if is_crouching:
+		var crouch_anim := "crouching_walk" if velocity.x != 0 else "crouching_idle"
+		if animation.sprite_frames and animation.sprite_frames.has_animation(crouch_anim):
+			animation.play(crouch_anim)
+		else:
+			animation.play("idle1") # placeholder até as animações de agachar serem importadas no SpriteFrames
+	elif is_on_floor():
 		if velocity.x != 0:
 			animation.play("walking2")
 		else:
