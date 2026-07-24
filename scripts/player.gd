@@ -1,4 +1,5 @@
 extends CharacterBody2D
+class_name Player
 
 @onready var animation: AnimatedSprite2D = $AnimatedSprite2D
 @onready var hurt_box: Area2D = $HurtBox
@@ -16,7 +17,7 @@ var base_magic_cooldown: float = 1.0 # Tempo base. Alterar isso acelera/desacele
 
 const MAGIC_COOLDOWN_MULT: float = 0.35
 const MAGIC_DAMAGE = 25
-const PARALYSIS_TIME = 1.1 # reduzido de 2.0 para o jogador ficar preso por menos tempo
+const PARALYSIS_TIME = 0.5 # reduzido de 2.0 para o jogador ficar preso por menos tempo
 
 var fireball_scene = preload("res://scenes/fireball.tscn")
 var facing_right: bool = true
@@ -35,6 +36,9 @@ var global_cooldown_max: float = 1.0
 var cooldown_visualizer: CooldownVisualizer
 var aura_visualizer: AuraVisualizer
 
+var wand_ability: WandAbility
+var force_field_ability: ForceFieldAbility
+
 func start_global_cooldown(duration: float) -> void:
 	global_cooldown_timer = duration
 	global_cooldown_max = duration
@@ -45,6 +49,7 @@ func is_global_cooldown_ready() -> bool:
 	return global_cooldown_timer <= 0.0
 
 func _ready() -> void:
+	add_to_group("player")
 	set_collision_mask_value(2, true) # colide com as paredes invisíveis (Layer 2)
 	hurt_box.body_entered.connect(_on_hurt_box_body_entered)
 	GameManager.game_over.connect(_on_match_ended)
@@ -64,6 +69,21 @@ func _ready() -> void:
 
 	aura_visualizer = AuraVisualizer.new()
 	add_child(aura_visualizer)
+
+	wand_ability = WandAbility.new()
+	add_child(wand_ability)
+
+	force_field_ability = ForceFieldAbility.new()
+	add_child(force_field_ability)
+
+## Itens já comprados que o pergaminho de evolução pode melhorar.
+func get_evolvable_abilities() -> Array:
+	var abilities: Array = []
+	if wand_ability.unlocked:
+		abilities.append(wand_ability)
+	if force_field_ability.unlocked:
+		abilities.append(force_field_ability)
+	return abilities
 
 func take_damage(amount: int, source: Node = null) -> void:
 	# Reservado para uma futura vida da própria maga, se o jogo evoluir para isso.
@@ -101,9 +121,26 @@ func _shake_camera() -> void:
 	tween.tween_property(camera, "offset", original_offset, 0.04)
 
 func _aim_direction() -> Vector2:
-	# Mira pela direção que a maga está encarando (controle todo pelo teclado)
-	return Vector2.RIGHT if facing_right else Vector2.LEFT
+	if wand_ability.auto_aim:
+		var target := _find_nearest_enemy()
+		if target:
+			return (target.global_position - global_position).normalized()
+	return (get_global_mouse_position() - global_position).normalized()
 
+func _find_nearest_enemy() -> Node2D:
+	var nearest: Node2D = null
+	var nearest_dist := INF
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if not is_instance_valid(enemy) or enemy.get("is_dead") == true:
+			continue
+		var dist := global_position.distance_to(enemy.global_position)
+		if dist < nearest_dist:
+			nearest = enemy
+			nearest_dist = dist
+	return nearest
+
+## Reservado: hoje não tem gatilho nenhum. Vai virar um item separado de
+## "campo de força" mais pra frente — por ora fica só a função guardada.
 func aura_attack() -> void:
 	if not is_attacking and not is_paralyzed and is_global_cooldown_ready():
 		is_attacking = true
@@ -133,7 +170,8 @@ func shoot_magic() -> void:
 	start_global_cooldown(MAGIC_COOLDOWN_MULT * base_magic_cooldown)
 	var fireball = fireball_scene.instantiate()
 	fireball.shooter = self
-	fireball.damage = MAGIC_DAMAGE
+	fireball.damage = MAGIC_DAMAGE + wand_ability.damage_bonus
+	fireball.speed += wand_ability.speed_bonus
 	fireball.direction = _aim_direction()
 	fireball.global_position = global_position + fireball.direction * 24.0
 	get_parent().add_child(fireball)
@@ -159,11 +197,12 @@ func _physics_process(delta: float) -> void:
 		velocity.y = JUMP_VELOCITIES[jump_count]
 		jump_count += 1
 
-	if Input.is_action_just_pressed("attack") and not is_attacking:
-		aura_attack()
-
-	if Input.is_action_just_pressed("shoot") and is_global_cooldown_ready():
+	# Tiro mágico acompanha o mouse e dispara com o clique — segurar o botão
+	# mantém o disparo. Com a Varinha evoluída, atira sozinho sem precisar clicar.
+	if (wand_ability.auto_fire or Input.is_action_pressed("attack")) and is_global_cooldown_ready():
 		shoot_magic()
+
+	# "shoot" (espaço/X) fica sem função por enquanto.
 
 	# Movimento horizontal
 	var direction := Input.get_axis("move_left", "move_right")

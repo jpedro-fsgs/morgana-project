@@ -7,6 +7,8 @@ class_name EnemyBase
 @export var village_damage: float = 1.0
 @export var defeat_score: int = 10
 @export var defeat_heal: float = 0.0  # cura à vila ao morrer (ex: giant = 2.0)
+@export var coin_count: int = 3
+@export var coin_scene: PackedScene = preload("res://scenes/coins/coin_silver.tscn")
 
 const GATE_X: float = 200.0
 
@@ -50,7 +52,14 @@ func die() -> void:
 	GameManager.register_enemy_defeated(defeat_score)
 	if defeat_heal > 0:
 		GameManager.heal_village(defeat_heal)
+	_spawn_coins()
 	_dissolve_into_smoke()
+
+func _spawn_coins() -> void:
+	for i in range(coin_count):
+		var particle := coin_scene.instantiate()
+		get_parent().add_child(particle)
+		particle.global_position = global_position + Vector2(randf_range(-10.0, 10.0), randf_range(-10.0, 10.0))
 
 func _reach_village() -> void:
 	GameManager.damage_village(village_damage)

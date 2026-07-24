@@ -6,7 +6,7 @@
 [ext_resource type="Script" path="res://scripts/enemy_spawner.gd" id="4_enemyspawner"]
 [ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="5_hud"]
 [ext_resource type="Script" uid="uid://bodpsd6r2s6kr" path="res://scripts/level.gd" id="6_level"]
-[ext_resource type="PackedScene" path="res://scenes/orb_pickup.tscn" id="7_orbpickup"]
+[ext_resource type="PackedScene" path="res://scenes/shop/shop.tscn" id="8_shop"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_walls"]
 size = Vector2(100, 2000)
@@ -66,19 +66,12 @@ collision_layer = 2
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall" unique_id=1389360631]
 shape = SubResource("RectangleShape2D_walls")
 
-[node name="OrbPickup" parent="." unique_id=485721575 instance=ExtResource("7_orbpickup")]
-position = Vector2(1000, 650)
-
-[node name="OrbPickup2" parent="." unique_id=1633735816 instance=ExtResource("7_orbpickup")]
-position = Vector2(2200, 600)
-
-[node name="OrbPickup3" parent="." unique_id=146033739 instance=ExtResource("7_orbpickup")]
-position = Vector2(3400, 650)
-
 [node name="EnemySpawner" type="Node2D" parent="." unique_id=282253281]
 script = ExtResource("4_enemyspawner")
 
 [node name="HUD" parent="." unique_id=1914251633 instance=ExtResource("5_hud")]
+
+[node name="Shop" parent="." instance=ExtResource("8_shop")]
 
 [node name="IntroCountdown" type="CanvasLayer" parent="." unique_id=1081364165]
 

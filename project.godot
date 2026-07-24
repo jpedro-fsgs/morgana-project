@@ -22,6 +22,7 @@ config/icon="uid://wb8cn8e25c63"
 [autoload]
 
 GameManager="*res://scripts/game_manager.gd"
+ItemManager="*res://scripts/items/item_manager.gd"
 
 [display]
 
