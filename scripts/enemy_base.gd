@@ -58,7 +58,7 @@ func die() -> void:
 func _spawn_coins() -> void:
 	for i in range(coin_count):
 		var particle := coin_scene.instantiate()
-		get_parent().add_child(particle)
+		get_parent().call_deferred("add_child", particle)
 		particle.global_position = global_position + Vector2(randf_range(-10.0, 10.0), randf_range(-10.0, 10.0))
 
 func _reach_village() -> void:
