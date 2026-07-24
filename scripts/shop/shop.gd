@@ -6,17 +6,20 @@ const AVAILABLE_ITEMS: Array[GDScript] = [
 	preload("res://scripts/items/coin_magnet_item.gd"),
 	preload("res://scripts/items/wand_item.gd"),
 	preload("res://scripts/items/force_field_item.gd"),
-	preload("res://scripts/items/scroll_orb_combo_item.gd"),
-	preload("res://scripts/items/scroll_orb_blade_item.gd"),
-	preload("res://scripts/items/scroll_orb_explosive_item.gd"),
-	preload("res://scripts/items/scroll_wand_item.gd"),
-	preload("res://scripts/items/scroll_force_field_item.gd"),
 ]
 
 const ORB_ITEMS: Array[GDScript] = [
 	preload("res://scripts/items/orb_combo_item.gd"),
 	preload("res://scripts/items/orb_blade_item.gd"),
 	preload("res://scripts/items/orb_explosive_item.gd"),
+]
+
+const SCROLL_ITEMS: Array[GDScript] = [
+	preload("res://scripts/items/scroll_orb_combo_item.gd"),
+	preload("res://scripts/items/scroll_orb_blade_item.gd"),
+	preload("res://scripts/items/scroll_orb_explosive_item.gd"),
+	preload("res://scripts/items/scroll_wand_item.gd"),
+	preload("res://scripts/items/scroll_force_field_item.gd"),
 ]
 
 @onready var shop_ui: Control = $ShopUI
@@ -37,7 +40,8 @@ const ORB_ITEMS: Array[GDScript] = [
 
 const INTRO_TITLE := "Sua primeira orbe mágica"
 const INTRO_HINT := "Ela luta ao seu lado sozinha. Depois, mais orbes e evoluções vão aparecer aqui de tempos em tempos."
-const DEFAULT_CHOICE_TITLE := "Escolha uma orbe"
+const ORB_CHOICE_TITLE := "Escolha uma orbe"
+const SCROLL_CHOICE_TITLE := "Escolha o que evoluir"
 
 var _current_item: ItemBase
 
@@ -63,7 +67,7 @@ func _run_intro_tutorial() -> void:
 
 	var choices := _available_orb_choices()
 	if not choices.is_empty():
-		_open_orb_choice(choices, true)
+		_open_choice_panel(choices, INTRO_TITLE, INTRO_HINT)
 
 func _on_timer_timeout() -> void:
 	if not GameManager.is_game_active:
@@ -71,7 +75,12 @@ func _on_timer_timeout() -> void:
 
 	var orb_choices := _available_orb_choices()
 	if not orb_choices.is_empty():
-		_open_orb_choice(orb_choices)
+		_open_choice_panel(orb_choices, ORB_CHOICE_TITLE)
+		return
+
+	var scroll_choices := _available_scroll_choices()
+	if not scroll_choices.is_empty():
+		_open_choice_panel(scroll_choices, SCROLL_CHOICE_TITLE)
 		return
 
 	var item := _pick_available_item()
@@ -94,6 +103,16 @@ func _available_orb_choices() -> Array[ItemBase]:
 			choices.append(item)
 	return choices
 
+## Reúne todos os pergaminhos de evolução disponíveis agora (um por orbe/
+## habilidade já equipada e ainda não no nível máximo), pra escolher qual comprar.
+func _available_scroll_choices() -> Array[ItemBase]:
+	var choices: Array[ItemBase] = []
+	for item_script in SCROLL_ITEMS:
+		var item: ItemBase = item_script.new()
+		if item.is_available():
+			choices.append(item)
+	return choices
+
 func _pick_available_item() -> ItemBase:
 	var candidates: Array[ItemBase] = []
 	for item_script in AVAILABLE_ITEMS:
@@ -104,14 +123,14 @@ func _pick_available_item() -> ItemBase:
 		return null
 	return candidates.pick_random()
 
-func _open_orb_choice(choices: Array[ItemBase], is_intro: bool = false) -> void:
+func _open_choice_panel(choices: Array[ItemBase], title: String, hint: String = "") -> void:
 	for child in choice_row.get_children():
 		child.queue_free()
 	for item in choices:
 		choice_row.add_child(_build_choice_card(item))
 
-	choice_title.text = INTRO_TITLE if is_intro else DEFAULT_CHOICE_TITLE
-	choice_hint.text = INTRO_HINT if is_intro else ""
+	choice_title.text = title
+	choice_hint.text = hint
 
 	shop_ui.visible = true
 	choice_panel.visible = true
@@ -120,7 +139,7 @@ func _open_orb_choice(choices: Array[ItemBase], is_intro: bool = false) -> void:
 
 func _build_choice_card(item: ItemBase) -> Control:
 	var card := VBoxContainer.new()
-	card.custom_minimum_size = Vector2(150, 170)
+	card.custom_minimum_size = Vector2(140, 170)
 	card.add_theme_constant_override("separation", 4)
 
 	var icon_stack := _build_icon_stack(item, Vector2(48, 48))
