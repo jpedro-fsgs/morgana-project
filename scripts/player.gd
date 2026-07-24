@@ -180,57 +180,67 @@ func _physics_process(delta: float) -> void:
 	if not GameManager.is_game_active:
 		return
 
-	# Gravidade (igual ao documento de referência)
+	_apply_gravity(delta)
+	
+	if is_paralyzed:
+		_handle_paralysis()
+		return
+		
+	_handle_jump()
+	_handle_combat()
+	_handle_movement()
+	
+	move_and_slide()
+
+func _process(delta: float) -> void:
+	_update_cooldown(delta)
+	_update_animations()
+
+# --- Funções de Componentes do _physics_process ---
+
+func _apply_gravity(delta: float) -> void:
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 	else:
 		jump_count = 0
 
-	if is_paralyzed:
-		velocity.x = 0
-		move_and_slide()
-		return
+func _handle_paralysis() -> void:
+	velocity.x = 0
+	move_and_slide()
 
-	# Pulo (até 4 pulos - seta ▲ / W - cada um um pouco mais baixo que o anterior
-	# para a maga alcançar a horda de morcegos sem tocar a barra de vida no topo)
+func _handle_jump() -> void:
 	if Input.is_action_just_pressed("jump") and jump_count < MAX_JUMPS:
 		velocity.y = JUMP_VELOCITIES[jump_count]
 		AudioManager.play_sfx("jump")
 		jump_count += 1
 
-	# Tiro mágico padrão (Botão Esquerdo)
+func _handle_combat() -> void:
 	if (wand_ability.auto_fire or Input.is_action_pressed("shoot_attack")) and is_global_cooldown_ready():
 		shoot_magic()
-
-	# Ataque de Aura (Botão Direito)
-	if Input.is_action_pressed("aura_attack") and is_global_cooldown_ready():
+	elif Input.is_action_pressed("aura_attack") and is_global_cooldown_ready():
 		aura_attack()
 
-	# "shoot" (espaço/X) fica sem função por enquanto.
-
-	# Movimento horizontal
+func _handle_movement() -> void:
 	var direction := Input.get_axis("move_left", "move_right")
-
 	if direction:
 		velocity.x = direction * SPEED
 	else:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
 
-	move_and_slide()
 
+# --- Funções de Componentes do _process ---
 
-func _process(delta: float) -> void:
+func _update_cooldown(delta: float) -> void:
 	if global_cooldown_timer > 0:
 		global_cooldown_timer -= delta
-		
 		if cooldown_visualizer and global_cooldown_max > 0:
 			var progress = 1.0 - (global_cooldown_timer / global_cooldown_max)
 			cooldown_visualizer.update_cooldown(progress)
-			
 		if global_cooldown_timer <= 0:
 			if cooldown_visualizer:
 				cooldown_visualizer.play_twinkle()
 
+func _update_animations() -> void:
 	if velocity.x > 0:
 		facing_right = true
 		animation.flip_h = false
