@@ -26,5 +26,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		_on_start_pressed()
 
 func _on_start_pressed() -> void:
+	AudioManager.play_sfx("button")
 	GameManager.restart_match()
 	get_tree().change_scene_to_file("res://scenes/level.tscn")

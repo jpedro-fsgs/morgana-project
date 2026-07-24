@@ -39,6 +39,7 @@ func take_damage(amount: int, source: Node = null) -> void:
 		return
 	hp -= amount
 	if hp > 0:
+		AudioManager.play_sfx("enemy_hit")
 		_flash_hurt()
 		return
 	die()
@@ -46,6 +47,7 @@ func take_damage(amount: int, source: Node = null) -> void:
 func die() -> void:
 	if is_dead:
 		return
+	AudioManager.play_sfx("enemy_die")
 	is_dead = true
 	velocity = Vector2.ZERO
 	_collision.set_deferred("disabled", true)
@@ -62,6 +64,7 @@ func _spawn_coins() -> void:
 		particle.global_position = global_position + Vector2(randf_range(-10.0, 10.0), randf_range(-10.0, 10.0))
 
 func _reach_village() -> void:
+	AudioManager.play_sfx("village_hit")
 	GameManager.damage_village(village_damage)
 	queue_free()
 

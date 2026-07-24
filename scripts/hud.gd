@@ -117,8 +117,10 @@ func _show_result(title: String, subtitle: String, color: Color) -> void:
 	result_panel.visible = true
 
 func _on_restart_pressed() -> void:
+	AudioManager.play_sfx("button")
 	GameManager.restart_match()
 	get_tree().reload_current_scene()
 
 func _on_menu_pressed() -> void:
+	AudioManager.play_sfx("button")
 	get_tree().change_scene_to_file("res://scenes/title.tscn")

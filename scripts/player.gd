@@ -102,7 +102,7 @@ func _paralyze() -> void:
 	is_paralyzed = true
 	animation.modulate = Color(0.55, 0.55, 1.0)
 	_shake_camera()
-	# TODO: tocar um som agudo aqui assim que houver um asset de áudio no projeto
+	AudioManager.play_sfx("player_hurt")
 
 	await get_tree().create_timer(PARALYSIS_TIME).timeout
 
@@ -144,6 +144,7 @@ func aura_attack() -> void:
 		is_attacking = true
 		animation.play("morgana_attack") # Mantém como placeholder
 		start_global_cooldown(AURA_COOLDOWN_MULT * base_magic_cooldown)
+		AudioManager.play_sfx("aura")
 		
 		# Efeito Visual 360
 		if aura_visualizer:
@@ -166,6 +167,7 @@ func shoot_magic() -> void:
 	is_attacking = true
 	animation.play("morgana_attack_2")
 	start_global_cooldown(MAGIC_COOLDOWN_MULT * base_magic_cooldown)
+	AudioManager.play_sfx("shoot")
 	var fireball = fireball_scene.instantiate()
 	fireball.shooter = self
 	fireball.damage = MAGIC_DAMAGE + wand_ability.damage_bonus
@@ -193,6 +195,7 @@ func _physics_process(delta: float) -> void:
 	# para a maga alcançar a horda de morcegos sem tocar a barra de vida no topo)
 	if Input.is_action_just_pressed("jump") and jump_count < MAX_JUMPS:
 		velocity.y = JUMP_VELOCITIES[jump_count]
+		AudioManager.play_sfx("jump")
 		jump_count += 1
 
 	# Tiro mágico padrão (Botão Esquerdo)
