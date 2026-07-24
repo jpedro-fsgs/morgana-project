@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://cdi0kscxtkbsa"]
+
+[ext_resource type="Script" uid="uid://do8le042oev6m" path="res://scripts/orbs/orb_explosive.gd" id="1_explosive"]
+
+[node name="OrbExplosive" type="Node2D" unique_id=445441450]
+script = ExtResource("1_explosive")
+
+[node name="Glow" type="Polygon2D" parent="." unique_id=1674291272]
+position = Vector2(1.1920929e-07, 1.1920929e-07)
+scale = Vector2(1.05, 0.98749995)
+color = Color(1, 0.55, 0.1, 0.28)
+polygon = PackedVector2Array(8, 0, 5.6, 5.6, 0, 8, -5.6, 5.6, -8, 0, -5.6, -5.6, 0, -8, 5.6, -5.6)
+
+[node name="Orb" type="Polygon2D" parent="." unique_id=2045566878]
+scale = Vector2(0.5625, 0.5625)
+color = Color(1, 0.4, 0.05, 0.95)
+polygon = PackedVector2Array(8, 0, 5.6, 5.6, 0, 8, -5.6, 5.6, -8, 0, -5.6, -5.6, 0, -8, 5.6, -5.6)
+
+[node name="Smoke" type="CPUParticles2D" parent="." unique_id=1011182474]
+position = Vector2(0, -5)
+emission_shape = 1
+emission_sphere_radius = 2.0
+spread = 50.0
+gravity = Vector2(0, -2)
+scale_amount_min = 0.5
+color = Color(0.91764706, 0.6784314, 0.5176471, 0.8)

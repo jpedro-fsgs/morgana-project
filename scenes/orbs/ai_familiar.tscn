@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://scripts/ai_familiar.gd" id="1_familiar"]
+[ext_resource type="Script" path="res://scripts/orbs/ai_familiar.gd" id="1_familiar"]
 
 [node name="AIFamiliar" type="Node2D"]
 script = ExtResource("1_familiar")

@@ -6,6 +6,18 @@ var damage_amount: int = 15
 var _pierce: bool = false
 var _player: Node2D
 
+const SIZE_MULT: float = 0.5
+
+# Bônus de evolução — somados por cima do tier de combo, já que _apply_tier()
+# reatribui damage_amount/orbit_speed/scale toda vez que o combo muda.
+var _evo_damage_bonus: int = 0
+var _evo_speed_bonus: float = 0.0
+var _evo_scale_mult: float = 1.0
+
+const EVO_DAMAGE_STEP: int = 4
+const EVO_SPEED_STEP: float = 0.6
+const EVO_SCALE_STEP: float = 0.12
+
 const POWER_TIERS := [
 	{"mult": 10, "damage": 45, "cooldown": 0.55, "radius": 520.0, "orbit_speed": 4.2, "pierce": true, "visual_scale": 1.6, "color": Color(1.0, 0.85, 0.3)},
 	{"mult": 8, "damage": 36, "cooldown": 0.7, "radius": 480.0, "orbit_speed": 3.6, "pierce": true, "visual_scale": 1.45, "color": Color(1.0, 0.55, 0.85)},
@@ -21,6 +33,22 @@ func _ready() -> void:
 	_player = get_parent().get_parent()
 	add_to_group("ai_familiar")
 	GameManager.combo_changed.connect(_on_combo_changed)
+	_apply_tier(_tier_for_multiplier(GameManager.combo_multiplier))
+
+func get_kind_id() -> StringName:
+	return &"orb_combo"
+
+func _on_speed_evolved() -> void:
+	_evo_speed_bonus += EVO_SPEED_STEP
+	_apply_tier(_tier_for_multiplier(GameManager.combo_multiplier))
+
+func _on_size_evolved() -> void:
+	_evo_scale_mult *= 1.0 + EVO_SCALE_STEP
+	orbit_radius += 6.0
+	_apply_tier(_tier_for_multiplier(GameManager.combo_multiplier))
+
+func _on_attack_evolved() -> void:
+	_evo_damage_bonus += EVO_DAMAGE_STEP
 	_apply_tier(_tier_for_multiplier(GameManager.combo_multiplier))
 
 func _on_combo_changed(multiplier: int, _streak: int) -> void:
@@ -48,8 +76,9 @@ func _update_visual(color: Color, visual_scale: float) -> void:
 	if glow:
 		glow.color = Color(color.r, color.g, color.b, 0.28)
 
+	var final_scale := visual_scale * SIZE_MULT
 	var tween := create_tween()
-	tween.tween_property(self, "scale", Vector2(visual_scale, visual_scale), 0.35)
+	tween.tween_property(self, "scale", Vector2(final_scale, final_scale), 0.35)
 
 func _find_target() -> Node2D:
 	# Como essa é uma orbe de combate padrão, ela busca o morcego mais perto

@@ -4,12 +4,20 @@ signal village_integrity_changed(value: float)
 signal time_changed(time_left: float)
 signal enemy_defeated_changed(count: int)
 signal score_changed(value: int)
+signal money_changed(value: int)
 signal combo_changed(multiplier: int, streak: int)
 signal combo_broken
 signal game_over
 signal victory
 signal wave_started(wave_num: int)
 signal preparation_started(wave_num: int)
+
+## TEMPORÁRIO (facilita testes): trava a partida na última wave configurada
+## em vez de dar vitória, pra continuar spawnando nesse ritmo indefinidamente.
+## Reverter quando o loop de jogo for definido.
+const INFINITE_TESTING_MODE: bool = true
+
+const STARTING_MONEY: int = 50
 
 const WAVES_CONFIG = [
 	{ "prep_time": 15.0, "wave_time": 60.0, "difficulty_mult": 1.0 },
@@ -42,8 +50,13 @@ var speed_multiplier: float = 1.0
 
 var score: int = 0
 var high_score: int = 0
+var money: int = 0
 var combo_streak: int = 0
 var combo_multiplier: int = 1
+
+## Ligado pelo item CoinMagnetItem (ver ItemManager) quando comprado: moedas
+## voam até a Morgana; quando false, ela precisa andar até elas no chão.
+var coin_magnet_enabled: bool = false
 
 func _ready() -> void:
 	_reset_state()
@@ -60,6 +73,7 @@ func _reset_state() -> void:
 	score = 0
 	combo_streak = 0
 	combo_multiplier = 1
+	money = STARTING_MONEY
 
 func _process(delta: float) -> void:
 	if not is_game_active or current_phase == GamePhase.ENDED:
@@ -85,6 +99,12 @@ func _start_wave() -> void:
 func _end_wave() -> void:
 	current_wave_index += 1
 	if current_wave_index >= WAVES_CONFIG.size():
+		if INFINITE_TESTING_MODE:
+			# Sem mais waves configuradas: repete a última indefinidamente
+			# em vez de dar vitória.
+			current_wave_index = WAVES_CONFIG.size() - 1
+			time_left = WAVES_CONFIG[current_wave_index].wave_time
+			return
 		_trigger_victory()
 	else:
 		current_phase = GamePhase.PREPARATION
@@ -103,6 +123,10 @@ func register_enemy_defeated(score_value: int = 10) -> void:
 
 	score += score_value * combo_multiplier
 	score_changed.emit(score)
+
+func add_money(amount: int = 1) -> void:
+	money += amount
+	money_changed.emit(money)
 
 func _multiplier_for_streak(streak: int) -> int:
 	for tier in COMBO_TIERS:
@@ -153,9 +177,11 @@ func _trigger_victory() -> void:
 	victory.emit()
 
 func restart_match() -> void:
+	ItemManager.reset()
 	_reset_state()
 	village_integrity_changed.emit(village_integrity)
 	time_changed.emit(time_left)
 	enemy_defeated_changed.emit(enemies_defeated)
 	score_changed.emit(score)
 	combo_changed.emit(combo_multiplier, combo_streak)
+	money_changed.emit(money)
