@@ -139,8 +139,6 @@ func _find_nearest_enemy() -> Node2D:
 			nearest_dist = dist
 	return nearest
 
-## Reservado: hoje não tem gatilho nenhum. Vai virar um item separado de
-## "campo de força" mais pra frente — por ora fica só a função guardada.
 func aura_attack() -> void:
 	if not is_attacking and not is_paralyzed and is_global_cooldown_ready():
 		is_attacking = true
@@ -197,10 +195,13 @@ func _physics_process(delta: float) -> void:
 		velocity.y = JUMP_VELOCITIES[jump_count]
 		jump_count += 1
 
-	# Tiro mágico acompanha o mouse e dispara com o clique — segurar o botão
-	# mantém o disparo. Com a Varinha evoluída, atira sozinho sem precisar clicar.
-	if (wand_ability.auto_fire or Input.is_action_pressed("attack")) and is_global_cooldown_ready():
+	# Tiro mágico padrão (Botão Esquerdo)
+	if (wand_ability.auto_fire or Input.is_action_pressed("shoot_attack")) and is_global_cooldown_ready():
 		shoot_magic()
+
+	# Ataque de Aura (Botão Direito)
+	if Input.is_action_pressed("aura_attack") and is_global_cooldown_ready():
+		aura_attack()
 
 	# "shoot" (espaço/X) fica sem função por enquanto.
 
